@@ -46,7 +46,7 @@ propy3
 Install the Python environment:
 
 ```bash
-git clone https://github.com/HeBinYu666/SplicingEffect.git IsoImpact
+git clone https://github.com/HeBinYu666/IsoImpact.git
 cd IsoImpact
 
 python -m venv .venv
