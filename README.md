@@ -1,86 +1,56 @@
 # IsoImpact
 
-## 1. Description
+## 1. Installation
 
-IsoImpact is a command-line pipeline for evaluating the potential functional impact of alternative splicing at the isoform level. Given transcript IDs, a matching GTF annotation file, and a matching protein FASTA file, IsoImpact performs two linked analyses:
-
-- genomic-coordinate mapping of protein domains across canonical and alternative isoforms
-- protein sequence feature extraction and signed feature-difference comparison
-
-The output includes a domain-aware isoform figure and a structured feature matrix containing transcript metadata, domain summaries, canonical feature values, alternative feature values, and delta values.
-
-IsoImpact does not predict protein domains by itself. For standard human and mouse Ensembl transcript IDs, this repository provides built-in domain-coordinate files generated for Ensembl release 110. For novel or custom isoforms, users should first predict domains with Pfam/PfamScan, HMMER, or InterProScan, then use the provided R script to convert protein-domain intervals to genomic coordinates.
-
-## 2. Repository Contents
-
-```text
-IsoImpact.py                              Main IsoImpact analysis pipeline
-data/human_domain.csv                     Built-in human domain-coordinate file
-data/mouse_domain.csv                     Built-in mouse domain-coordinate file
-scripts/build_custom_domain.R             Build a custom domain CSV for novel isoforms
-scripts/build_reference_domain_database.R  Reproduce human/mouse reference domain CSV files
-requirements.txt                          Python dependencies
-```
-
-The built-in domain files use the following required columns:
-
-```text
-Protein_ID,Domain_ID,Domain_Name,Genomic_Start,Genomic_End
-```
-
-## 3. Dependencies
-
-IsoImpact is implemented in Python and uses R only when users need to build a custom domain-coordinate file for novel isoforms.
-
-Python dependencies:
-
-```text
-Python >= 3.8
-numpy
-pandas
-matplotlib
-biopython
-propy3
-```
-
-Install the Python environment:
+Clone the repository and enter the project directory:
 
 ```bash
 git clone https://github.com/HeBinYu666/IsoImpact.git
 cd IsoImpact
+```
 
+Create and activate a Python environment:
+
+```bash
 python -m venv .venv
 source .venv/bin/activate
+```
+
+On Windows, activate the environment with:
+
+```bash
+.venv\Scripts\activate
+```
+
+Install the required Python packages:
+
+```bash
 pip install -r requirements.txt
+```
+
+Check that IsoImpact can be started:
+
+```bash
 python IsoImpact.py --help
 ```
 
-R/Bioconductor dependencies for custom or novel isoforms:
+## 2. Usage
 
-```r
-install.packages("BiocManager")
-BiocManager::install(c("ensembldb", "GenomicRanges"))
-install.packages("dplyr")
+IsoImpact requires three main inputs:
+
+```text
+1. Ensembl transcript IDs for the isoforms to be compared.
+2. A matching GTF annotation file.
+3. A matching protein FASTA file.
 ```
 
-Additional R/Bioconductor dependency for reproducing the bundled human and mouse domain-coordinate files with `scripts/build_reference_domain_database.R`:
+The transcript IDs must match the supplied GTF file. The protein FASTA file must contain the protein sequences corresponding to the selected transcripts. For standard human and mouse Ensembl release 110 isoforms, IsoImpact automatically uses the built-in domain-coordinate files in the `data` directory, so users do not need to provide `-d/--domain`.
 
-```r
-BiocManager::install("AnnotationHub")
-```
+The GTF file is required because IsoImpact uses it to identify transcript, exon, CDS, UTR, gene, and protein ID annotations for the selected isoforms. The protein FASTA file is required because IsoImpact extracts the corresponding amino acid sequences and calculates protein sequence features from those sequences. For standard human and mouse workflows, the GTF and protein FASTA files should come from Ensembl release 110, because the built-in domain-coordinate files were generated from the same Ensembl release. Using matching files helps ensure that transcript IDs, protein IDs, genomic coordinates, and domain annotations can be linked correctly. These reference GTF and protein FASTA files are large, so they are not included directly in this GitHub repository. Users should download them from Ensembl before running IsoImpact.
 
-## 4. Input Data
+### 2.1 Human
 
-### Standard Human Or Mouse Ensembl Isoforms
-
-For standard human or mouse Ensembl transcript IDs, do not provide `-d/--domain`. IsoImpact automatically selects the built-in domain-coordinate file:
-
-- human IDs such as `ENST...` use `data/human_domain.csv`
-- mouse IDs such as `ENSMUST...` use `data/mouse_domain.csv`
-
-The built-in domain files are matched to Ensembl release 110. Therefore, users should download the corresponding release 110 GTF and peptide FASTA files.
-
-Human reference files, Ensembl release 110:
+Download the Ensembl release 110 human GTF and protein FASTA files:
 
 ```bash
 mkdir -p references
@@ -95,7 +65,28 @@ gunzip references/Homo_sapiens.GRCh38.110.gtf.gz
 gunzip references/Homo_sapiens.GRCh38.pep.all.fa.gz
 ```
 
-Mouse reference files, Ensembl release 110:
+Run IsoImpact with human Ensembl transcript IDs:
+
+```bash
+mkdir -p results/MROH2B
+
+python IsoImpact.py \
+  -i ENST00000421030 ENST00000440047 ENST00000413188 ENST00000409996 \
+  -g references/Homo_sapiens.GRCh38.110.gtf \
+  -f references/Homo_sapiens.GRCh38.pep.all.fa \
+  -o results/MROH2B \
+  --prefix MROH2B
+```
+
+For human transcript IDs beginning with `ENST`, IsoImpact automatically selects:
+
+```text
+data/human_domain.csv
+```
+
+### 2.2 Mouse
+
+Download the Ensembl release 110 mouse GTF and protein FASTA files:
 
 ```bash
 mkdir -p references
@@ -110,50 +101,11 @@ gunzip references/Mus_musculus.GRCm39.110.gtf.gz
 gunzip references/Mus_musculus.GRCm39.pep.all.fa.gz
 ```
 
-### Novel Or Custom Isoforms
-
-Use `-d/--domain` only when the transcript IDs or annotations are not covered by the built-in human or mouse domain-coordinate files. This includes novel isoforms from Iso-Seq, custom assemblies, non-model organisms, or a different annotation release.
-
-Custom isoform analysis requires:
-
-```text
-1. A CDS-aware custom GTF file.
-2. A matching protein FASTA file.
-3. Pfam/PfamScan, HMMER, or InterProScan domain results for those proteins.
-4. A custom domain-coordinate CSV generated by scripts/build_custom_domain.R.
-```
-
-The protein IDs in the Pfam/PfamScan result file must match the `protein_id` values in the GTF and the sequence identifiers in the protein FASTA file.
-
-## 5. Usage
-
-### Human Multi-Isoform Comparison
-
-The following command reproduces the MROH2B-style analysis described in the manuscript. It uses the built-in human domain-coordinate file automatically, so `-d` is not needed.
+Run IsoImpact with mouse Ensembl transcript IDs:
 
 ```bash
-mkdir -p results/MROH2B
+mkdir -p results/mouse_isoforms
 
-python IsoImpact.py \
-  -i ENST00000421030 ENST00000440047 ENST00000413188 ENST00000409996 \
-  -g references/Homo_sapiens.GRCh38.110.gtf \
-  -f references/Homo_sapiens.GRCh38.pep.all.fa \
-  -o results/MROH2B \
-  --prefix MROH2B
-```
-
-Expected output:
-
-```text
-results/MROH2B/MROH2B_features.csv
-results/MROH2B/MROH2B_figure.png
-```
-
-### Mouse Multi-Isoform Comparison
-
-For mouse, provide mouse Ensembl transcript IDs and the matching Ensembl release 110 mouse GTF and peptide FASTA files. IsoImpact automatically selects `data/mouse_domain.csv`.
-
-```bash
 python IsoImpact.py \
   -i ENSMUST00000000000 ENSMUST00000000001 \
   -g references/Mus_musculus.GRCm39.110.gtf \
@@ -162,23 +114,35 @@ python IsoImpact.py \
   --prefix mouse_isoforms
 ```
 
-Replace the two transcript IDs with the mouse isoforms that should be compared.
+Replace the example transcript IDs with the mouse isoforms to be compared. For mouse transcript IDs beginning with `ENSMUST`, IsoImpact automatically selects:
 
-### Exon-Domain Query
-
-The query mode checks whether a genomic exon interval overlaps annotated domains. FASTA is not required for this mode.
-
-```bash
-python IsoImpact.py \
-  -q ENST00000421030 60155030 60155320 \
-  -g references/Homo_sapiens.GRCh38.110.gtf
+```text
+data/mouse_domain.csv
 ```
 
-For standard human or mouse Ensembl IDs, the built-in domain-coordinate file is selected automatically.
+## 3. Custom Domain Annotation
 
-### Novel Isoform Analysis With A Custom Domain File
+This section is only needed for novel isoforms, custom isoforms, non-model organisms, or annotations that are not covered by the built-in human and mouse Ensembl release 110 domain-coordinate files.
 
-First build a custom domain-coordinate CSV from a CDS-aware GTF and a Pfam/PfamScan result table:
+For a custom analysis, users need:
+
+```text
+1. A CDS-aware GTF file.
+2. A matching protein FASTA file.
+3. Pfam/PfamScan domain-prediction results for the corresponding protein sequences.
+```
+
+The protein IDs in the Pfam/PfamScan result file must match the `protein_id` values in the GTF file. The same protein IDs should also be used in the protein FASTA headers.
+
+Install the R packages required by the helper script:
+
+```r
+install.packages("BiocManager")
+BiocManager::install(c("ensembldb", "GenomicRanges"))
+install.packages("dplyr")
+```
+
+Build an IsoImpact-compatible custom domain-coordinate file:
 
 ```bash
 Rscript scripts/build_custom_domain.R \
@@ -187,7 +151,7 @@ Rscript scripts/build_custom_domain.R \
   --out custom_domain.csv
 ```
 
-Then run IsoImpact with `-d custom_domain.csv`:
+Then run IsoImpact with the custom domain-coordinate file:
 
 ```bash
 python IsoImpact.py \
@@ -199,48 +163,23 @@ python IsoImpact.py \
   --prefix novel
 ```
 
-This is the only standard situation where `-d` is required.
+Use `-d/--domain` only when providing a custom domain-coordinate file. Standard human and mouse Ensembl release 110 workflows do not require this option.
 
-### Reproducing The Built-In Domain Files
+## 4. Output Files
 
-The bundled `data/human_domain.csv` and `data/mouse_domain.csv` files were generated by projecting Pfam-derived protein-domain intervals back to Ensembl release 110 CDS coordinates. The reproducibility script is provided for transparency and is not required for routine IsoImpact analyses.
+IsoImpact generates two main output files:
 
-```bash
-Rscript scripts/build_reference_domain_database.R \
-  --species "Homo sapiens" \
-  --release 110 \
-  --pfam all_human_pfam_results.txt \
-  --out data/human_domain.csv
+```text
+<prefix>_features.csv
+<prefix>_figure.png
 ```
 
-For mouse, use `--species "Mus musculus"` and write the output to `data/mouse_domain.csv`.
+`<prefix>_features.csv` contains transcript metadata, domain summaries, canonical feature values, alternative feature values, and feature-difference values.
 
-## 6. Output Files
-
-`<prefix>_features.csv` contains:
-
-- gene, transcript, protein, and coding biotype metadata
-- protein length and molecular weight comparisons
-- exon count and genomic span comparisons
-- shared, lost, and gained domain summaries
-- canonical, alternative, and delta values for protein sequence features
-
-`<prefix>_figure.png` contains:
-
-- panel A: genomic-coordinate exon, CDS, and domain mapping for all input isoforms
-- panel B: ranked signed feature differences between each alternative isoform and the canonical isoform
+`<prefix>_figure.png` contains the domain-mapping visualization and ranked feature-difference plots for the input isoforms.
 
 IsoImpact selects the canonical baseline by parsing `Ensembl_canonical` or `MANE_Select` tags when available. If neither tag is available, it uses the input transcript with the largest genomic span.
 
-## 7. Notes
-
-- Use Ensembl release 110 GTF and peptide FASTA files with the built-in human and mouse domain files.
-- Do not pass `-d` for standard human or mouse Ensembl release 110 workflows.
-- Use `-d` only for custom domain-coordinate files, such as novel isoform analyses or non-release-110 annotations.
-- Domain interpretation depends on the compatibility of the transcript IDs, GTF, FASTA, and domain-coordinate CSV.
-- The number of extracted features may vary with sequence length and optional package availability, especially `propy3`.
-- Feature values are protein sequence indicators of potential functional divergence, not direct measurements of folding, stability, or molecular interaction.
-
-## 8. Contact
+## 5. Contact
 
 Please open a GitHub issue for questions, bug reports, or feature requests.
