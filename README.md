@@ -78,8 +78,6 @@ gunzip references/Homo_sapiens.GRCh38.pep.all.fa.gz
 Run IsoImpact with human Ensembl transcript IDs:
 
 ```bash
-mkdir -p results/human_isoforms
-
 python IsoImpact.py \
   -i ENST00000421030 ENST00000440047 ENST00000413188 ENST00000409996 \
   -g references/Homo_sapiens.GRCh38.110.gtf \
@@ -115,8 +113,6 @@ gunzip references/Mus_musculus.GRCm39.pep.all.fa.gz
 Run IsoImpact with mouse Ensembl transcript IDs:
 
 ```bash
-mkdir -p results/mouse_isoforms
-
 python IsoImpact.py \
   -i ENSMUST00000000000 ENSMUST00000000001 \
   -g references/Mus_musculus.GRCm39.110.gtf \
