@@ -116,7 +116,7 @@ Run IsoImpact with mouse Ensembl transcript IDs:
 
 ```bash
 python IsoImpact.py \
-  -i ENSMUST00000193361 ENSMUST00000064562 ENSMUST00000092420 ENSMUST00000105424 \
+  -i ENSMUST00000112701 ENSMUST00000134301 \
   -g references/Mus_musculus.GRCm39.110.gtf \
   -f references/Mus_musculus.GRCm39.pep.all.fa \
   -o results/mouse_isoforms
