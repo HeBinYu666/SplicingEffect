@@ -1,5 +1,9 @@
 # IsoImpact
 
+**IsoImpact: an automated pipeline to evaluate the functional impact of alternative splicing based on isoform sequences.**
+
+IsoImpact is an automated pipeline designed to evaluate the functional impact of alternative splicing. It systematically compares protein sequence features, genomic coordinates, and domain annotations across different transcript isoforms to reveal the functional consequences of alternative splicing events.
+
 ## 1. Installation
 
 Download IsoImpact from GitHub:
@@ -9,7 +13,7 @@ git clone https://github.com/HeBinYu666/IsoImpact.git
 cd IsoImpact
 ```
 
-IsoImpact is implemented in Python. The required Python packages are listed in `requirements.txt`:
+IsoImpact is implemented in Python. It requires Python 3.8 or higher. The required Python packages are listed in `requirements.txt`:
 
 ```text
 numpy>=1.21
@@ -25,7 +29,7 @@ Install these packages with:
 pip install -r requirements.txt
 ```
 
-No R package is required for the standard human and mouse IsoImpact workflows. R is only needed when users want to build a custom domain-coordinate file for novel or custom isoforms.
+No R package is required for the standard human and mouse IsoImpact workflows. R is only needed when users want to build a custom domain-coordinate file for novel or custom isoforms.A dedicated tutorial for this process is provided in Part 3.
 
 ## 2. Usage
 
@@ -137,7 +141,7 @@ For a custom analysis, users need:
 ```text
 1. A CDS-aware GTF file.
 2. A matching protein FASTA file.
-3. Pfam/PfamScan domain-prediction results for the corresponding protein sequences.
+3. Pfam/PfamScan domain-prediction results for the corresponding protein sequences(e.g., generated via local PfamScan or InterProScan).
 ```
 
 The custom GTF file must contain CDS records, because the helper script maps protein-domain intervals back to genomic CDS coordinates. The protein IDs in the Pfam/PfamScan result file must match the `protein_id` values in the GTF file. The same protein IDs should also be used in the protein FASTA headers.
