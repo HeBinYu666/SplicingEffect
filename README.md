@@ -195,6 +195,10 @@ canonical, alternative, and delta values for protein sequence features
 
 `IsoImpact_figure.png` contains the domain-mapping visualization and ranked feature-difference plots for the input isoforms.
 
+An example output generated from four human MROH2B isoforms is provided in [`docs/example_output/`](docs/example_output/). The example feature table is available as [`IsoImpact_features.csv`](docs/example_output/IsoImpact_features.csv), and the corresponding output figure is shown below.
+
+![IsoImpact example output figure](docs/example_output/IsoImpact_figure.png)
+
 IsoImpact selects the canonical baseline by parsing `Ensembl_canonical` or `MANE_Select` tags when available. If neither tag is available, it uses the input transcript with the largest genomic span.
 
 ## 5. Contact
