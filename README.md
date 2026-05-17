@@ -197,6 +197,14 @@ canonical, alternative, and delta values for protein sequence features
 
 An example output generated from four human MROH2B isoforms is provided in [`docs/example_output/`](docs/example_output/). The example feature table is available as [`IsoImpact_features.csv`](docs/example_output/IsoImpact_features.csv), and the corresponding output figure is shown below.
 
+Example feature-table preview:
+
+| Alternative transcript | Canonical protein length | Alternative protein length | Protein length difference | Lost domains | Gained domains | Total domain change |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| ENST00000440047 | 1323 | 754 | -569 | 1 | 0 | 1 |
+| ENST00000413188 | 1323 | 627 | -696 | 2 | 0 | 2 |
+| ENST00000409996 | 1323 | 891 | -432 | 0 | 0 | 0 |
+
 ![IsoImpact example output figure](docs/example_output/IsoImpact_figure.png)
 
 IsoImpact selects the canonical baseline by parsing `Ensembl_canonical` or `MANE_Select` tags when available. If neither tag is available, it uses the input transcript with the largest genomic span.
