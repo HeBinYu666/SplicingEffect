@@ -203,7 +203,7 @@ An example feature-table preview from four human MROH2B isoforms is shown below.
 
 `IsoImpact_figure.png` contains the domain-mapping visualization and ranked feature-difference plots for the input isoforms.
 
-An example output figure from the same four human MROH2B isoforms is shown below. The example files are provided in [`docs/example_output/`](docs/example_output/).
+An example output figure from the same four human MROH2B isoforms is shown below. The example files are provided in [`docs/example_output/IsoImpact_figure.png`](docs/example_output/IsoImpact_figure.png).
 
 ![IsoImpact example output figure](docs/example_output/IsoImpact_figure.png)
 
