@@ -71,7 +71,7 @@ python IsoImpact.py \
   -o results/human_isoforms
 ```
 
-This example uses `data/human_domain.csv`, which was built from Ensembl release 110.
+Because this example compares human isoforms, it uses the human domain-coordinate file `data/human_domain.csv`.
 
 After the command finishes, IsoImpact writes the feature table to:
 
@@ -125,7 +125,7 @@ python IsoImpact.py \
   -o results/mouse_isoforms
 ```
 
-Replace the example transcript IDs with the mouse isoforms to be compared. This example uses `data/mouse_domain.csv`, which was built from Ensembl release 110.
+Replace the example transcript IDs with the mouse isoforms to be compared. Because this example compares mouse isoforms, it uses the mouse domain-coordinate file `data/mouse_domain.csv`.
 
 ## 3. Building Domain Annotation Files for New Isoforms
 
