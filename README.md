@@ -170,6 +170,7 @@ python IsoImpact.py \
 
 ## 4. Contact
 
-Email:hzb022119@163.com
+For questions, bug reports, or feature requests, please open a GitHub issue or contact the maintainers:
 
-Email:hongdong@csu.edu.cn
+- hzb022119@163.com
+- hongdong@csu.edu.cn
