@@ -73,11 +73,10 @@ python IsoImpact.py \
 
 This example uses `data/human_domain.csv`, which was built from Ensembl release 110.
 
-After the command finishes, IsoImpact writes two main output files to the output directory:
+After the command finishes, IsoImpact writes the feature table to:
 
 ```text
 results/human_isoforms/IsoImpact_features.csv
-results/human_isoforms/IsoImpact_figure.png
 ```
 
 `IsoImpact_features.csv` contains gene, transcript, protein, coding biotype, protein feature, genomic span, and domain comparison results. An example feature-table preview from four human MROH2B isoforms is shown below. The complete example table is available as [`docs/example_output/IsoImpact_features.csv`](docs/example_output/IsoImpact_features.csv).
@@ -87,6 +86,12 @@ results/human_isoforms/IsoImpact_figure.png
 | ENST00000440047 | HEAT_Maestro_2; HEAT_Maestro | HEAT_MROH2B_C | None | 1 |
 | ENST00000413188 | HEAT_Maestro_2 | HEAT_Maestro; HEAT_MROH2B_C | None | 2 |
 | ENST00000409996 | HEAT_Maestro_2; HEAT_Maestro; HEAT_MROH2B_C | None | None | 0 |
+
+IsoImpact also writes the output figure to:
+
+```text
+results/human_isoforms/IsoImpact_figure.png
+```
 
 `IsoImpact_figure.png` contains the domain-mapping visualization and ranked feature-difference plot for the input isoforms. An example output figure from the same four human MROH2B isoforms is shown below. The example figure is available as [`docs/example_output/IsoImpact_figure.png`](docs/example_output/IsoImpact_figure.png).
 
