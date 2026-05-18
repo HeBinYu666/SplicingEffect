@@ -129,9 +129,9 @@ Replace the example transcript IDs with the mouse isoforms to be compared. This 
 
 ## 3. Building Domain Annotation Files for New Isoforms
 
-The human and mouse examples above use the provided domain-coordinate CSV files, so no R package is required for those analyses. The R script in this repository is provided for isoforms that are not recorded in the provided domain-coordinate files. In this situation, users need to prepare their own annotation files and domain-prediction results, then use the R script to build a matching domain-coordinate CSV file before running IsoImpact.
+The human and mouse examples above use the provided domain-coordinate CSV files, so no R package is required for those analyses. The R script in this repository is provided for users who need to build a matching domain-coordinate CSV file, for example when using another Ensembl annotation version or isoforms that are not covered by the provided domain-coordinate files.
 
-Here, new isoforms means isoforms that are not covered by the domain-coordinate CSV file used for the analysis. If the isoforms are not recorded in the GTF and protein FASTA files, users also need to provide matching GTF and protein FASTA files for those isoforms. To build the domain-coordinate CSV file, the helper script uses the GTF file and Pfam/PfamScan results.
+The helper script follows the official `ensembldb` coordinate-mapping workflow. It builds an EnsDb database from the user-provided GTF file and uses `proteinToGenome()` to map Pfam/PfamScan protein-domain intervals back to genomic coordinates. This workflow requires compatible input files: the target isoforms must be present in the supplied annotation files, the GTF file must contain CDS and `protein_id` annotations for those isoforms, and the protein IDs in the Pfam/PfamScan results must match the `protein_id` values in the GTF file.
 
 For this process, users need:
 

@@ -1,9 +1,10 @@
 #!/usr/bin/env Rscript
 
-# Build a custom IsoImpact-compatible domain-coordinate CSV for novel isoforms.
+# Build a custom IsoImpact-compatible domain-coordinate CSV with official
+# ensembldb coordinate-mapping functions.
 # Required inputs:
-#   1. A CDS-aware custom GTF file whose protein_id values match the protein IDs
-#      used in the FASTA and Pfam results.
+#   1. A CDS-aware GTF file whose protein_id values match the protein IDs used
+#      in the Pfam/PfamScan results.
 #   2. A standard Pfam/PfamScan result table. The script expects protein ID,
 #      domain start, domain end, Pfam ID, and domain name in the standard columns.
 
@@ -18,7 +19,7 @@ usage <- function() {
     "Usage:\n",
     "  Rscript scripts/build_custom_domain.R --gtf custom.gtf --pfam pfam_results.txt --out custom_domain.csv\n\n",
     "Options:\n",
-    "  --gtf      CDS-aware GTF file for the custom or novel isoforms\n",
+    "  --gtf      CDS-aware GTF file for the custom annotation\n",
     "  --pfam     Pfam/PfamScan result table for the corresponding protein sequences\n",
     "  --out      Output CSV used by IsoImpact with -d/--domain\n",
     "  --sqlite   Optional temporary EnsDb sqlite file path\n",
@@ -53,12 +54,16 @@ if (is.null(USER_GTF) || is.null(PFAM_TXT)) {
 message("[IsoImpact] Checking custom GTF...")
 if (!file.exists(USER_GTF)) stop("GTF file not found: ", USER_GTF, call. = FALSE)
 
-cds_count_str <- tryCatch(
-  system2("grep", args = c("-c", "\tCDS\t", USER_GTF), stdout = TRUE, stderr = FALSE),
-  warning = function(w) "0",
-  error = function(e) "0"
-)
-cds_count <- suppressWarnings(as.integer(cds_count_str[[1]]))
+open_gtf <- if (grepl("\\.gz$", USER_GTF, ignore.case = TRUE)) gzfile else file
+con <- open_gtf(USER_GTF, open = "rt")
+on.exit(close(con), add = TRUE)
+
+cds_count <- 0L
+repeat {
+  lines <- readLines(con, n = 100000, warn = FALSE)
+  if (!length(lines)) break
+  cds_count <- cds_count + sum(grepl("\tCDS\t", lines, fixed = TRUE))
+}
 
 if (is.na(cds_count) || cds_count == 0) {
   stop(
