@@ -41,6 +41,8 @@ IsoImpact uses the following command-line inputs:
 
 The transcript IDs must match the supplied GTF file. The GTF file provides transcript, exon, CDS, UTR, gene, and protein ID annotations for the selected isoforms. The protein FASTA file provides the corresponding amino acid sequences. The domain-coordinate CSV file provides the protein-domain annotations used for domain comparison and visualization.
 
+The provided human and mouse domain-coordinate CSV files were built from Ensembl release 110. Therefore, the human and mouse examples below use Ensembl release 110 GTF and protein FASTA files so that transcript IDs, protein IDs, genomic coordinates, and domain annotations match each other. Users can use another annotation version by building a matching domain-coordinate CSV file with the helper script described in Section 3.
+
 ### 2.1 Human
 
 Step 1. Download the Ensembl release 110 human GTF and protein FASTA files:
@@ -122,7 +124,9 @@ Replace the example transcript IDs with the mouse isoforms to be compared. This 
 
 ## 3. Building Domain Annotation Files for New Isoforms
 
-No R package is required for the human and mouse examples above. R is only needed when users need to build a domain-coordinate CSV file for isoforms that are not covered by the provided human or mouse domain-coordinate files.
+The human and mouse examples above use the provided domain-coordinate CSV files, so no R package is required for those analyses. The R script in this repository is provided for isoforms that are not recorded in the provided domain-coordinate files. In this situation, users need to prepare their own annotation files and domain-prediction results, then use the R script to build a matching domain-coordinate CSV file before running IsoImpact.
+
+Here, new isoforms means isoforms that are not covered by the domain-coordinate CSV file used for the analysis. If the isoforms are not recorded in the GTF and protein FASTA files, users also need to provide matching GTF and protein FASTA files for those isoforms. To build the domain-coordinate CSV file, the helper script uses the GTF file and Pfam/PfamScan results.
 
 For this process, users need:
 
