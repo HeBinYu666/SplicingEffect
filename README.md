@@ -193,13 +193,13 @@ shared, lost, and gained domain summaries
 canonical, alternative, and delta values for protein sequence features
 ```
 
-An example feature-table preview from four human MROH2B isoforms is shown below. The complete example table is available as [`docs/example_output/IsoImpact_features.csv`](docs/example_output/IsoImpact_features.csv).
+An example feature-table preview from four human MROH2B isoforms is shown below. The canonical isoform contains HEAT_Maestro_2, HEAT_Maestro, and HEAT_MROH2B_C domains. The complete example table is available as [`docs/example_output/IsoImpact_features.csv`](docs/example_output/IsoImpact_features.csv).
 
-| Alternative transcript | Canonical protein length | Alternative protein length | Protein length difference | Lost domains | Gained domains | Total domain change |
-| --- | ---: | ---: | ---: | ---: | ---: | ---: |
-| ENST00000440047 | 1323 | 754 | -569 | 1 | 0 | 1 |
-| ENST00000413188 | 1323 | 627 | -696 | 2 | 0 | 2 |
-| ENST00000409996 | 1323 | 891 | -432 | 0 | 0 | 0 |
+| Alternative transcript | Alternative domains | Lost domains | Gained domains | Total domain change |
+| --- | --- | --- | --- | ---: |
+| ENST00000440047 | HEAT_Maestro_2; HEAT_Maestro | HEAT_MROH2B_C | None | 1 |
+| ENST00000413188 | HEAT_Maestro_2 | HEAT_Maestro; HEAT_MROH2B_C | None | 2 |
+| ENST00000409996 | HEAT_Maestro_2; HEAT_Maestro; HEAT_MROH2B_C | None | None | 0 |
 
 `IsoImpact_figure.png` contains the domain-mapping visualization and ranked feature-difference plots for the input isoforms.
 
