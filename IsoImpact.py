@@ -40,8 +40,8 @@ group.add_argument(
 parser.add_argument("-g", "--gtf", help="Path to the matching GTF annotation file")
 parser.add_argument("-f", "--fasta", help="Path to the matching protein FASTA file")
 parser.add_argument(
-    "-d", "--domain", default=None,
-    help="Optional custom domain-coordinate CSV. Standard human/mouse runs use built-in files."
+    "-d", "--domain", required=True,
+    help="Path to the matching domain-coordinate CSV file"
 )
 parser.add_argument(
     "-o", "--outdir", default=".",
@@ -75,24 +75,10 @@ except ImportError as exc:
     )
 
 # =====================================================================
-# 2. Built-in human/mouse domain routing, with optional custom override
+# 2. Domain annotation input
 # =====================================================================
-target_id_for_routing = args.query_exon[0] if args.query_exon else args.isoform[0]
-
-if args.domain:
-    DOMAIN_CSV = args.domain
-    print(f"[IsoImpact] Using user-provided domain-coordinate file: {DOMAIN_CSV}")
-elif target_id_for_routing.startswith("ENSMUS"):
-    DOMAIN_CSV = DEFAULT_MOUSE_DOMAIN_CSV
-    print(f"[IsoImpact] Mouse Ensembl ID detected; using built-in mouse domain database: {DOMAIN_CSV}")
-elif target_id_for_routing.startswith("ENS"):
-    DOMAIN_CSV = DEFAULT_HUMAN_DOMAIN_CSV
-    print(f"[IsoImpact] Human Ensembl ID detected; using built-in human domain database: {DOMAIN_CSV}")
-else:
-    parser.error(
-        "Could not infer a built-in human/mouse domain database from the transcript ID. "
-        "For novel or custom isoforms, provide a compatible domain CSV with -d/--domain."
-    )
+DOMAIN_CSV = args.domain
+print(f"[IsoImpact] Using domain-coordinate file: {DOMAIN_CSV}")
 
 if not GTF_FILE:
     parser.error("A matching GTF annotation file is required with -g/--gtf.")

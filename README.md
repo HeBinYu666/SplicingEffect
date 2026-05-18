@@ -27,42 +27,23 @@ Install these packages with:
 pip install -r requirements.txt
 ```
 
-No R package is required for the standard human and mouse IsoImpact workflows. R is only needed when users want to build a custom domain-coordinate file for novel or custom isoforms.A dedicated tutorial for this process is provided in Part 3.
-
 ## 2. Usage
 
-IsoImpact requires three main inputs:
+IsoImpact uses the following command-line inputs:
 
 ```text
-1. Ensembl transcript IDs for the isoforms to be compared.
-2. A matching GTF annotation file.
-3. A matching protein FASTA file.
-```
-
-The transcript IDs must match the supplied GTF file. The GTF file is required because IsoImpact uses it to identify transcript, exon, CDS, UTR, gene, and protein ID annotations for the selected isoforms. The protein FASTA file is required because IsoImpact extracts the corresponding amino acid sequences and calculates protein sequence features from those sequences.
-
-For standard human and mouse workflows, the GTF and protein FASTA files should come from Ensembl release 110, because the built-in domain-coordinate files in this repository were generated from the same Ensembl release. Using matching files helps ensure that transcript IDs, protein IDs, genomic coordinates, and domain annotations can be linked correctly. These reference GTF and protein FASTA files are large, so they are not included directly in this GitHub repository. Users should download them from Ensembl before running IsoImpact.
-
-The main command uses the following options:
-
-```text
--i / --isoform   Transcript IDs to compare. At least two transcript IDs are required.
+-i / --isoform   Ensembl transcript IDs for the isoforms to be compared. At least two transcript IDs are required.
 -g / --gtf       Path to the matching GTF annotation file.
 -f / --fasta     Path to the matching protein FASTA file.
+-d / --domain    Path to the matching domain-coordinate CSV file.
 -o / --outdir    Directory where output files will be saved. The default is the current directory.
--d / --domain    Optional custom domain-coordinate CSV file. This is not needed for standard human or mouse Ensembl release 110 runs.
 ```
 
-For example, if `-o results/human_isoforms` is used, IsoImpact writes the main output files as:
-
-```text
-results/human_isoforms/IsoImpact_features.csv
-results/human_isoforms/IsoImpact_figure.png
-```
+The transcript IDs must match the supplied GTF file. The GTF file provides transcript, exon, CDS, UTR, gene, and protein ID annotations for the selected isoforms. The protein FASTA file provides the corresponding amino acid sequences. The domain-coordinate CSV file provides the protein-domain annotations used for domain comparison and visualization.
 
 ### 2.1 Human
 
-Download the Ensembl release 110 human GTF and protein FASTA files:
+Step 1. Download the Ensembl release 110 human GTF and protein FASTA files:
 
 ```bash
 mkdir -p references
@@ -77,27 +58,41 @@ gunzip references/Homo_sapiens.GRCh38.110.gtf.gz
 gunzip references/Homo_sapiens.GRCh38.pep.all.fa.gz
 ```
 
-Run IsoImpact with human Ensembl transcript IDs:
+Step 2. Run IsoImpact with human Ensembl transcript IDs:
 
 ```bash
 python IsoImpact.py \
   -i ENST00000421030 ENST00000440047 ENST00000413188 ENST00000409996 \
   -g references/Homo_sapiens.GRCh38.110.gtf \
   -f references/Homo_sapiens.GRCh38.pep.all.fa \
+  -d data/human_domain.csv \
   -o results/human_isoforms
 ```
 
-For human transcript IDs beginning with `ENST`, IsoImpact automatically uses:
+This example uses `data/human_domain.csv`, which was built from Ensembl release 110.
+
+After the command finishes, IsoImpact writes two main output files to the output directory:
 
 ```text
-data/human_domain.csv
+results/human_isoforms/IsoImpact_features.csv
+results/human_isoforms/IsoImpact_figure.png
 ```
 
-Therefore, `-d/--domain` is not required for the standard human Ensembl release 110 workflow.
+`IsoImpact_features.csv` contains gene, transcript, protein, coding biotype, protein feature, genomic span, and domain comparison results. An example feature-table preview from four human MROH2B isoforms is shown below. The complete example table is available as [`docs/example_output/IsoImpact_features.csv`](docs/example_output/IsoImpact_features.csv).
+
+| Alternative transcript | Alternative domains | Lost domains | Gained domains | Total domain change |
+| --- | --- | --- | --- | ---: |
+| ENST00000440047 | HEAT_Maestro_2; HEAT_Maestro | HEAT_MROH2B_C | None | 1 |
+| ENST00000413188 | HEAT_Maestro_2 | HEAT_Maestro; HEAT_MROH2B_C | None | 2 |
+| ENST00000409996 | HEAT_Maestro_2; HEAT_Maestro; HEAT_MROH2B_C | None | None | 0 |
+
+`IsoImpact_figure.png` contains the domain-mapping visualization and ranked feature-difference plot for the input isoforms. An example output figure from the same four human MROH2B isoforms is shown below. The example figure is available as [`docs/example_output/IsoImpact_figure.png`](docs/example_output/IsoImpact_figure.png).
+
+![IsoImpact example output figure](docs/example_output/IsoImpact_figure.png)
 
 ### 2.2 Mouse
 
-Download the Ensembl release 110 mouse GTF and protein FASTA files:
+Step 1. Download the Ensembl release 110 mouse GTF and protein FASTA files:
 
 ```bash
 mkdir -p references
@@ -112,37 +107,31 @@ gunzip references/Mus_musculus.GRCm39.110.gtf.gz
 gunzip references/Mus_musculus.GRCm39.pep.all.fa.gz
 ```
 
-Run IsoImpact with mouse Ensembl transcript IDs:
+Step 2. Run IsoImpact with mouse Ensembl transcript IDs:
 
 ```bash
 python IsoImpact.py \
   -i ENSMUST00000112701 ENSMUST00000134301 \
   -g references/Mus_musculus.GRCm39.110.gtf \
   -f references/Mus_musculus.GRCm39.pep.all.fa \
+  -d data/mouse_domain.csv \
   -o results/mouse_isoforms
 ```
 
-Replace the example transcript IDs with the mouse isoforms to be compared. For mouse transcript IDs beginning with `ENSMUST`, IsoImpact automatically uses:
+Replace the example transcript IDs with the mouse isoforms to be compared. This example uses `data/mouse_domain.csv`, which was built from Ensembl release 110.
 
-```text
-data/mouse_domain.csv
-```
+## 3. Building Domain Annotation Files for New Isoforms
 
-Therefore, `-d/--domain` is not required for the standard mouse Ensembl release 110 workflow.
+No R package is required for the human and mouse examples above. R is only needed when users need to build a domain-coordinate CSV file for isoforms that are not covered by the provided human or mouse domain-coordinate files.
 
-## 3. Custom Domain Annotation
-
-This section is only needed for novel isoforms, custom isoforms, non-model organisms, or annotations that are not covered by the built-in human and mouse Ensembl release 110 domain-coordinate files.
-
-For a custom analysis, users need:
+For this process, users need:
 
 ```text
 1. A CDS-aware GTF file.
-2. A matching protein FASTA file.
-3. Pfam/PfamScan domain-prediction results for the corresponding protein sequences(e.g., generated via local PfamScan or InterProScan).
+2. Pfam/PfamScan domain-prediction results for the corresponding protein sequences.
 ```
 
-The custom GTF file must contain CDS records, because the helper script maps protein-domain intervals back to genomic CDS coordinates. The protein IDs in the Pfam/PfamScan result file must match the `protein_id` values in the GTF file. The same protein IDs should also be used in the protein FASTA headers.
+The GTF file must contain CDS records, because the helper script maps protein-domain intervals back to genomic CDS coordinates. The protein IDs in the Pfam/PfamScan result file must match the `protein_id` values in the GTF file.
 
 Install the R packages required by the helper script:
 
@@ -152,63 +141,32 @@ BiocManager::install(c("ensembldb", "GenomicRanges"))
 install.packages("dplyr")
 ```
 
-Build an IsoImpact-compatible custom domain-coordinate file:
+Build an IsoImpact-compatible domain-coordinate file:
 
 ```bash
 Rscript scripts/build_custom_domain.R \
-  --gtf your_novel_isoforms.gtf \
+  --gtf your_isoforms.gtf \
   --pfam your_pfam_results.txt \
   --out custom_domain.csv
 ```
 
-Then run IsoImpact with the custom domain-coordinate file:
+Then run IsoImpact with the generated domain-coordinate file:
 
 ```bash
 python IsoImpact.py \
   -i novel_tx_1 novel_tx_2 \
-  -g your_novel_isoforms.gtf \
-  -f your_novel_proteins.fa \
+  -g your_isoforms.gtf \
+  -f your_proteins.fa \
   -d custom_domain.csv \
   -o results/novel
 ```
 
-Use `-d/--domain` only when providing a custom domain-coordinate file. Standard human and mouse Ensembl release 110 workflows do not require this option.
+## 4. Contact
 
-## 4. Output Files
+Name:
 
-IsoImpact generates two main output files:
+Email:
 
-```text
-IsoImpact_features.csv
-IsoImpact_figure.png
-```
+Name:
 
-`IsoImpact_features.csv` contains:
-
-```text
-gene, transcript, protein, and coding biotype metadata
-protein length and molecular weight comparisons
-exon count and genomic span comparisons
-shared, lost, and gained domain summaries
-canonical, alternative, and delta values for protein sequence features
-```
-
-An example feature-table preview from four human MROH2B isoforms is shown below. The canonical isoform contains HEAT_Maestro_2, HEAT_Maestro, and HEAT_MROH2B_C domains. The complete example table is available as [`docs/example_output/IsoImpact_features.csv`](docs/example_output/IsoImpact_features.csv).
-
-| Alternative transcript | Alternative domains | Lost domains | Gained domains | Total domain change |
-| --- | --- | --- | --- | ---: |
-| ENST00000440047 | HEAT_Maestro_2; HEAT_Maestro | HEAT_MROH2B_C | None | 1 |
-| ENST00000413188 | HEAT_Maestro_2 | HEAT_Maestro; HEAT_MROH2B_C | None | 2 |
-| ENST00000409996 | HEAT_Maestro_2; HEAT_Maestro; HEAT_MROH2B_C | None | None | 0 |
-
-`IsoImpact_figure.png` contains the domain-mapping visualization and ranked feature-difference plots for the input isoforms.
-
-An example output figure from the same four human MROH2B isoforms is shown below. The example files are provided in [`docs/example_output/IsoImpact_figure.png`](docs/example_output/IsoImpact_figure.png).
-
-![IsoImpact example output figure](docs/example_output/IsoImpact_figure.png)
-
-IsoImpact selects the canonical baseline by parsing `Ensembl_canonical` or `MANE_Select` tags when available. If neither tag is available, it uses the input transcript with the largest genomic span.
-
-## 5. Contact
-
-Please open a GitHub issue for questions, bug reports, or feature requests.
+Email:
