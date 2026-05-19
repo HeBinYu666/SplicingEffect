@@ -127,7 +127,7 @@ python IsoImpact.py \
 
 Replace the example transcript IDs with the mouse isoforms to be compared. Because this example compares mouse isoforms, it uses the mouse domain-coordinate file `data/mouse_domain.csv`.
 
-## 3. Building Domain Annotation Files for New Isoforms
+## 3. Building Domain Annotation Files for Novel Isoforms
 
 For novel isoforms (i.e., isoforms absent from the provided domain-coordinate CSV files), users can use the script/build_custom_domain.R script to build matching annotation files.
 
