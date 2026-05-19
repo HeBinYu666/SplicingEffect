@@ -129,7 +129,7 @@ Replace the example transcript IDs with the mouse isoforms to be compared. Becau
 
 ## 3. Building Domain Annotation Files for New Isoforms
 
-For novel isoforms or isoforms that are not covered by the provided domain-coordinate CSV files, users can use the R script in this repository to build a matching domain-coordinate CSV file. Here, novel isoforms refer to isoforms that are not included in the current domain-coordinate annotation file used by IsoImpact.
+For novel isoforms (i.e., isoforms absent from the provided domain-coordinate CSV files), users can use the script/build_custom_domain.R script to build matching annotation files.
 
 For this process, users need:
 
