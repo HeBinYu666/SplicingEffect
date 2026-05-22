@@ -1,6 +1,6 @@
 # IsoImpact
 
-IsoImpact is an automated pipeline designed to evaluate the functional impact of alternative splicing. It systematically compares protein sequence features, genomic coordinates, and domain annotations across different transcript isoforms to reveal the functional consequences of alternative splicing events.
+IsoImpact is an automated pipeline designed to evaluate the functional impact of alternative splicing. It systematically compares protein sequence features, genomic coordinates, and domain annotations across different transcript isoforms to reveal the functional consequences of alternative splicing events.（整句字要改一下，功能根据我们的cover letter来改一下）
 
 ## 1. Installation
 
@@ -33,15 +33,15 @@ IsoImpact uses the following command-line inputs:
 
 ```text
 -i / --isoform   Ensembl transcript IDs for the isoforms to be compared. At least two transcript IDs are required.
--g / --gtf       Path to the matching GTF annotation file.
--f / --fasta     Path to the matching protein FASTA file.
--d / --domain    Path to the matching domain-coordinate CSV file.
+-g / --gtf       Path to the GTF annotation file.
+-f / --fasta     Path to the protein FASTA file.
+-d / --domain    Path to the domain-coordinate CSV file.
 -o / --outdir    Directory where output files will be saved. The default is the current directory.
 ```
 
-The transcript IDs must match the supplied GTF file. The GTF file provides transcript, exon, CDS, UTR, gene, and protein ID annotations for the selected isoforms. The protein FASTA file provides the corresponding amino acid sequences. The domain-coordinate CSV file provides the protein-domain annotations used for domain comparison and visualization.
+The transcript IDs (-i) must match the supplied GTF file. The GTF file (-g) provides transcript, exon, CDS, UTR, gene, and protein ID annotations for the selected isoforms. The protein FASTA (-f) file provides the corresponding amino acid sequences. The domain-coordinate CSV file (-d) provides the protein-domain annotations used for domain comparison and visualization.
 
-The provided human and mouse domain-coordinate CSV files were built from Ensembl release 110. Therefore, the human and mouse examples below use Ensembl release 110 GTF and protein FASTA files so that transcript IDs, protein IDs, genomic coordinates, and domain annotations match each other. Users can use another annotation version by building a matching domain-coordinate CSV file with the helper script described in Section 3.
+（加几句话或一句话，不要显得太突然，比如：默认条件下，我们预先生成的domain文件是...,所以....）The provided human and mouse domain-coordinate CSV files were built from Ensembl release 110. Therefore, the human and mouse examples below use Ensembl release 110 GTF and protein FASTA files so that transcript IDs, protein IDs, genomic coordinates, and domain annotations match each other.
 
 ### 2.1 Example usage using human isoforms
 
@@ -60,7 +60,7 @@ gunzip references/Homo_sapiens.GRCh38.110.gtf.gz
 gunzip references/Homo_sapiens.GRCh38.pep.all.fa.gz
 ```
 
-Step 2. Run IsoImpact with human Ensembl transcript IDs:
+Step 2. Run IsoImpact with human Ensembl transcript IDs of 4 isoforms from （基因名称和ID）:
 
 ```bash
 python IsoImpact.py \
@@ -71,9 +71,9 @@ python IsoImpact.py \
   -o results/human_isoforms
 ```
 
-Because this example compares human isoforms, it uses the human domain-coordinate file `data/human_domain.csv`.
+Because this example compares human isoforms, it uses the human domain-coordinate file `data/human_domain.csv` by default.
 
-After the command finishes, IsoImpact writes the feature table to:
+After the command finishes, IsoImpact writes the feature martix to table:
 
 ```text
 results/human_isoforms/IsoImpact_features.csv
