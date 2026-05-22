@@ -172,5 +172,5 @@ python IsoImpact.py \
 
 For questions, bug reports, or feature requests, please open a GitHub issue or contact the maintainers:
 
-- hzb022119@163.com
-- hongdong@csu.edu.cn
+- HeBinyu：hzb022119@163.com
+- LiHongdong：hongdong@csu.edu.cn
