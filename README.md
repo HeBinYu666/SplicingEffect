@@ -91,13 +91,11 @@ results/human_isoforms/IsoImpact_features.csv
 
 `IsoImpact_features.csv` contains gene, transcript, protein, coding biotype, protein feature, genomic span, and domain comparison results. An example feature-table preview from four human MROH7 isoforms is shown below. The complete example table is available as [`docs/example_output/IsoImpact_features.csv`](docs/example_output/IsoImpact_features.csv).
 
-The `Gene_ID` value in the example output is `ENSG00000184313`, corresponding to MROH7. Domain names such as `HEAT_MROH2B_C` are Pfam/domain-family labels from the annotation file and should not be interpreted as the gene symbol of the example isoforms.
-
-| Gene ID | Canonical transcript | Alternative transcript | Alternative coding potential | Lost domain labels | Gained domain labels | Total domain change |
+| Gene ID | Canonical transcript | Alternative transcript | Alternative domains | Lost domains | Gained domains | Total domain change |
 | --- | --- | --- | --- | --- | --- | ---: |
-| ENSG00000184313 | ENST00000421030 | ENST00000440047 | nonsense_mediated_decay | HEAT_MROH2B_C | None | 1 |
-| ENSG00000184313 | ENST00000421030 | ENST00000413188 | nonsense_mediated_decay | HEAT_Maestro; HEAT_MROH2B_C | None | 2 |
-| ENSG00000184313 | ENST00000421030 | ENST00000409996 | protein_coding | None | None | 0 |
+| ENSG00000184313 | ENST00000421030 | ENST00000440047 | HEAT_Maestro_2; HEAT_Maestro | HEAT_MROH2B_C | None | 1 |
+| ENSG00000184313 | ENST00000421030 | ENST00000413188 | HEAT_Maestro_2 | HEAT_Maestro; HEAT_MROH2B_C | None | 2 |
+| ENSG00000184313 | ENST00000421030 | ENST00000409996 | HEAT_Maestro_2; HEAT_Maestro; HEAT_MROH2B_C | None | None | 0 |
 
 ### 2.2 Example usage using mouse isoforms
 
