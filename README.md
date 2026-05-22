@@ -79,7 +79,7 @@ After the command finishes, IsoImpact writes the output figure to:
 results/human_isoforms/IsoImpact_figure.png
 ```
 
-`IsoImpact_figure.png` contains the domain-mapping visualization and ranked feature-difference plot for the input isoforms. An example output figure from the same four human MROH7 isoforms is shown below. The example figure is available as [`docs/example_output/IsoImpact_figure.png`](docs/example_output/IsoImpact_figure.png).
+`IsoImpact_figure.png` contains the domain-mapping visualization and ranked feature-difference plot for the input isoforms. An example output figure from the four human MROH7 isoforms is shown below. The example figure is available as [`docs/example_output/IsoImpact_figure.png`](docs/example_output/IsoImpact_figure.png).
 
 ![IsoImpact example output figure](docs/example_output/IsoImpact_figure.png)
 
