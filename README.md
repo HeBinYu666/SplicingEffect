@@ -27,7 +27,7 @@ Install these packages with:
 pip install -r requirements.txt
 ```
 
-## 2. Usage
+## 2. Command-line options
 
 IsoImpact uses the following command-line inputs:
 
@@ -43,7 +43,7 @@ The transcript IDs must match the supplied GTF file. The GTF file provides trans
 
 The provided human and mouse domain-coordinate CSV files were built from Ensembl release 110. Therefore, the human and mouse examples below use Ensembl release 110 GTF and protein FASTA files so that transcript IDs, protein IDs, genomic coordinates, and domain annotations match each other. Users can use another annotation version by building a matching domain-coordinate CSV file with the helper script described in Section 3.
 
-### 2.1 Human
+### 2.1 Example usage using human isoforms
 
 Step 1. Download the Ensembl release 110 human GTF and protein FASTA files:
 
@@ -97,7 +97,7 @@ results/human_isoforms/IsoImpact_figure.png
 
 ![IsoImpact example output figure](docs/example_output/IsoImpact_figure.png)
 
-### 2.2 Mouse
+### 2.2 Example usage using mouse isoforms
 
 Step 1. Download the Ensembl release 110 mouse GTF and protein FASTA files:
 
