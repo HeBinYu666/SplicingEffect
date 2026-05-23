@@ -1,6 +1,6 @@
 # IsoImpact
 
-IsoImpact is an automated pipeline for assessing the potential functional consequences of alternative transcript isoforms. It integrates transcript annotation, protein sequence features, genomic coordinates, and protein-domain information to compare isoforms and highlight domain-level and sequence-feature changes associated with alternative splicing.
+IsoImpact is an automated pipeline for assessing the potential functional consequences of alternative transcript isoforms. It integrates transcript annotation, protein sequence features, genomic coordinates, and protein-domain information to compare isoforms and highlight domain-level and sequence-feature changes associated with alternative splicing.（修改一下，按照最新的cover letter总结的修改一下）
 
 ## 1. Installation
 
