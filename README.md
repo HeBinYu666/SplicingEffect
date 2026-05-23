@@ -1,6 +1,6 @@
 # IsoImpact
 
-IsoImpact is an automated pipeline for assessing the potential functional consequences of alternative transcript isoforms. It integrates transcript annotation, protein sequence features, genomic coordinates, and protein-domain information to compare isoforms and highlight domain-level and sequence-feature changes associated with alternative splicing.（修改一下，按照最新的cover letter总结的修改一下）
+IsoImpact is a command-line pipeline that automates the functional evaluation of protein-coding splice isoforms. Starting from isoform IDs, a GTF annotation file, a proteome FASTA file, and a matching domain-coordinate CSV file, IsoImpact integrates domain mapping, multi-isoform domain visualization and comparison, protein feature extraction, and feature-difference analysis into a unified automated workflow.
 
 ## 1. Installation
 
@@ -39,7 +39,7 @@ IsoImpact uses the following command-line inputs:
 -o / --outdir    Directory where output files will be saved. The default is the current directory.
 ```
 
-The transcript IDs (-i) must match the supplied GTF file. The GTF file (-g) provides transcript, exon, CDS, UTR, gene, and protein ID annotations for the selected isoforms. The protein FASTA (-f) file provides the corresponding amino acid sequences. The domain-coordinate CSV file (-d) provides the protein-domain annotations used for domain comparison and visualization.
+The transcript IDs (`-i`) must match the supplied GTF file. The GTF file (`-g`) provides transcript, exon, CDS, UTR, gene, and protein ID annotations for the selected isoforms. The protein FASTA file (`-f`) provides the corresponding amino acid sequences. The domain-coordinate CSV file (`-d`) provides the protein-domain annotations used for domain comparison and visualization.
 
 IsoImpact includes pre-built human and mouse domain-coordinate CSV files under the `data/` directory. These files were generated from Ensembl release 110, so the human and mouse examples below use Ensembl release 110 GTF and protein FASTA files to keep transcript IDs, protein IDs, genomic coordinates, and domain annotations consistent.
 
@@ -71,9 +71,9 @@ python IsoImpact.py \
   -o results/human_isoforms
 ```
 
-Because this example compares human isoforms, it uses the human domain-coordinate file `data/human_domain.csv` by default.
+Because this example compares human isoforms, it uses the human domain-coordinate file `data/human_domain.csv`.
 
-After the command finishes, IsoImpact writes the output figure to table:
+After the command finishes, IsoImpact writes the output figure to:
 
 ```text
 results/human_isoforms/IsoImpact_figure.png
@@ -89,7 +89,7 @@ IsoImpact also writes the feature matrix to:
 results/human_isoforms/IsoImpact_features.csv
 ```
 
-`IsoImpact_features.csv` contains gene, transcript, protein, coding biotype, protein feature, genomic span, and domain comparison results. An example feature martix preview from four human MROH7 isoforms is shown below. The complete example table is available as [`docs/example_output/IsoImpact_features.csv`](docs/example_output/IsoImpact_features.csv).
+`IsoImpact_features.csv` contains gene, transcript, protein, coding biotype, protein feature, genomic span, and domain comparison results. An example feature-matrix preview from four human MROH7 isoforms is shown below. The complete example table is available as [`docs/example_output/IsoImpact_features.csv`](docs/example_output/IsoImpact_features.csv).
 
 | Gene ID | Canonical transcript | Alternative transcript | Alternative domains | Lost domains | Gained domains | Total domain change |
 | --- | --- | --- | --- | --- | --- | ---: |
@@ -125,20 +125,20 @@ python IsoImpact.py \
   -o results/mouse_isoforms
 ```
 
-Replace the example transcript IDs with the mouse isoforms to be compared. Because this example compares mouse isoforms, it uses the mouse domain-coordinate file `data/mouse_domain.csv` by default.
+Replace the example transcript IDs with the mouse isoforms to be compared. Because this example compares mouse isoforms, it uses the mouse domain-coordinate file `data/mouse_domain.csv`.
 
 ## 3. Building Domain Annotation Files for Novel Isoforms
 
-For novel isoforms (i.e., isoforms absent from the provided domain-coordinate CSV files ， 例如新发现的人或小鼠isoform或者其他生物种类的isoform), users can use the 在script文件夹下的 build_custom_domain.R script to build matching annotation files.
+For novel isoforms or other isoforms that are not included in the provided domain-coordinate CSV files, users can use `scripts/build_custom_domain.R` to build a matching domain-coordinate CSV file for IsoImpact. Here, novel isoforms include newly identified human or mouse isoforms and isoforms from other species.
 
 For this process, users need:
 
 ```text
-1. A CDS-aware GTF file.（写的清楚一点，我的这个gtf文件究竟是要什么，感觉这个cds-aware不清晰）
-2. Pfam/PfamScan domain-prediction results for the corresponding protein sequences.（写清楚一点，相应蛋白质pfam结果可以写更清楚点，比如，要测试的新颖isoform对应的蛋白质pfam结果）
+1. A GTF file that contains the target isoforms and their CDS records, including transcript_id and protein_id annotations.
+2. Pfam/PfamScan domain-prediction results for the protein sequences of the same target isoforms.
 ```
 
-The GTF file must contain CDS records, because the helper script maps protein-domain intervals back to genomic CDS coordinates. The protein IDs in the Pfam/PfamScan result file must match the `protein_id` values in the GTF file.
+The GTF file must contain CDS records because the helper script maps protein-domain intervals back to genomic CDS coordinates. The protein IDs in the Pfam/PfamScan result file must match the `protein_id` values in the GTF file; otherwise, the script cannot link the predicted domains to the corresponding isoforms.
 
 Install the R packages required by the helper script:
 
@@ -170,7 +170,9 @@ python IsoImpact.py \
 
 ## 4. Contact
 
-For questions, bug reports, or feature requests, please open a GitHub issue or contact the maintainers:(写清楚点，尽量让什么都不懂得人，看字面意思就知道什么意思，而且用词要准确）
+If you have questions about installing or running IsoImpact, or if you find an error in the code or documentation, please contact:
 
-- HeBinyu：hzb022119@163.com
-- LiHongdong：hongdong@csu.edu.cn
+- Bin-Yu He: hzb022119@163.com
+- Hong-Dong Li: hongdong@csu.edu.cn
+
+You can also report problems through the Issues page of this GitHub repository.
