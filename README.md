@@ -1,6 +1,6 @@
 # IsoImpact
 
-IsoImpact is a command-line pipeline that automates the functional evaluation of protein-coding splice isoforms. Starting from isoform IDs, a GTF annotation file, a proteome FASTA file, and a matching domain-coordinate CSV file, IsoImpact integrates domain mapping, multi-isoform domain visualization and comparison, protein feature extraction, and feature-difference analysis into a unified automated workflow.
+IsoImpact is a command-line pipeline that automates the functional evaluation of protein-coding splice isoforms. Starting from isoform IDs, a GTF annotation file, a proteome FASTA file, and a matching domain-coordinate CSV file, IsoImpact integrates multi-isoform domain mapping and comparison, protein feature extraction, and feature-difference analysis into a unified automated workflow.
 
 ## 1. Installation
 
@@ -71,7 +71,7 @@ python IsoImpact.py \
   -o results/human_isoforms
 ```
 
-Because this example compares human isoforms, it uses the human domain-coordinate file `data/human_domain.csv`.
+Because this example compares human isoforms, it uses the human domain-coordinate file `data/human_domain.csv` by default.
 
 After the command finishes, IsoImpact writes the output figure to:
 
@@ -125,17 +125,17 @@ python IsoImpact.py \
   -o results/mouse_isoforms
 ```
 
-Replace the example transcript IDs with the mouse isoforms to be compared. Because this example compares mouse isoforms, it uses the mouse domain-coordinate file `data/mouse_domain.csv`.
+Replace the example transcript IDs with the mouse isoforms to be compared. Because this example compares mouse isoforms, it uses the mouse domain-coordinate file `data/mouse_domain.csv` by default.
 
 ## 3. Building Domain Annotation Files for Novel Isoforms
 
-For novel isoforms or other isoforms that are not included in the provided domain-coordinate CSV files, users can use `scripts/build_custom_domain.R` to build a matching domain-coordinate CSV file for IsoImpact. Here, novel isoforms include newly identified human or mouse isoforms and isoforms from other species.
+For novel isoforms, such as newly identified human or mouse isoforms or isoforms from other species, users can use the `build_custom_domain.R` script in the `scripts/` directory to build a matching domain-coordinate CSV file.
 
 For this process, users need:
 
 ```text
-1. A GTF file that contains the target isoforms and their CDS records, including transcript_id and protein_id annotations.
-2. Pfam/PfamScan domain-prediction results for the protein sequences of the same target isoforms.
+1. A GTF file that contains the novel isoforms to be analyzed. This GTF file must include CDS records for these isoforms, as well as transcript_id and protein_id annotations.
+2. Pfam/PfamScan domain-prediction results for the protein sequences corresponding to the novel isoforms to be analyzed.
 ```
 
 The GTF file must contain CDS records because the helper script maps protein-domain intervals back to genomic CDS coordinates. The protein IDs in the Pfam/PfamScan result file must match the `protein_id` values in the GTF file; otherwise, the script cannot link the predicted domains to the corresponding isoforms.
