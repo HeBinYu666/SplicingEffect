@@ -1,6 +1,6 @@
 # IsoImpact
 
-IsoImpact is a command-line pipeline that automates the functional evaluation of protein-coding splice isoforms. Starting from isoform IDs, a GTF annotation file, a proteome FASTA file, and a matching domain-coordinate CSV file, IsoImpact integrates multi-isoform domain mapping and comparison, protein feature extraction, and feature-difference analysis into a unified automated workflow.
+IsoImpact is a command-line pipeline that automates the functional evaluation of protein-coding splice isoforms. It integrates multi-isoform domain mapping and comparison, protein feature extraction, and feature-difference analysis into a unified automated workflow.
 
 ## 1. Installation
 
