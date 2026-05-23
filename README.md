@@ -89,7 +89,7 @@ IsoImpact also writes the feature matrix to:
 results/human_isoforms/IsoImpact_features.csv
 ```
 
-`IsoImpact_features.csv` contains gene, transcript, protein, coding biotype, protein feature, genomic span, and domain comparison results. An example feature-table preview from four human MROH7 isoforms is shown below. The complete example table is available as [`docs/example_output/IsoImpact_features.csv`](docs/example_output/IsoImpact_features.csv).
+`IsoImpact_features.csv` contains gene, transcript, protein, coding biotype, protein feature, genomic span, and domain comparison results. An example feature martix preview from four human MROH7 isoforms is shown below. The complete example table is available as [`docs/example_output/IsoImpact_features.csv`](docs/example_output/IsoImpact_features.csv).
 
 | Gene ID | Canonical transcript | Alternative transcript | Alternative domains | Lost domains | Gained domains | Total domain change |
 | --- | --- | --- | --- | --- | --- | ---: |
