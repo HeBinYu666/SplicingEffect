@@ -41,7 +41,7 @@ IsoImpact uses the following command-line inputs:
 
 The transcript IDs (`-i`) must match the supplied GTF file. The GTF file (`-g`) provides transcript, exon, CDS, UTR, gene, and protein ID annotations for the selected isoforms. The protein FASTA file (`-f`) provides the corresponding amino acid sequences. The domain-coordinate CSV file (`-d`) provides the protein-domain annotations used for domain comparison and visualization.
 
-IsoImpact includes pre-built human and mouse domain-coordinate CSV files under the `data/` directory. These files were generated from Ensembl release 110, so the human and mouse examples below use Ensembl release 110 GTF and protein FASTA files to keep transcript IDs, protein IDs, genomic coordinates, and domain annotations consistent.
+IsoImpact includes pre-built human and mouse domain-coordinate CSV files under the `data/` directory. These files were generated from Ensembl release 110, so the human and mouse examples below use Ensembl release 110 GTF and protein FASTA files to keep transcript IDs, protein IDs, genomic coordinates, and domain annotations consistent.Other Ensembl releases or custom annotation files are also supported, as long as the GTF file, protein FASTA file, and domain-coordinate CSV file are based on the same annotation version and use consistent transcript and protein identifiers.
 
 ### 2.1 Example usage using human isoforms
 
