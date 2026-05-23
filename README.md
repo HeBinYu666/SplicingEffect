@@ -175,4 +175,4 @@ If you have questions about installing or running IsoImpact, or if you find an e
 - Bin-Yu He: hzb022119@163.com
 - Hong-Dong Li: hongdong@csu.edu.cn
 
-You can also report problems through the Issues page of this GitHub repository.
+You can also click the **Issues** tab at the top of this GitHub page to report problems.
