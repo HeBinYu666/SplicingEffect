@@ -129,7 +129,7 @@ Replace the example transcript IDs with the mouse isoforms to be compared. Becau
 
 ## 3. Building Domain Annotation Files for Novel Isoforms
 
-For novel isoforms, such as newly identified human or mouse isoforms or isoforms from other species, users can use the `build_custom_domain.R` script in the `scripts/` directory to build a matching domain-coordinate CSV file.
+For novel isoforms, including novel human or mouse isoforms and isoforms from other species, users can use the `build_custom_domain.R` script in the `scripts/` directory to build a matching domain-coordinate CSV file.
 
 For this process, users need:
 
