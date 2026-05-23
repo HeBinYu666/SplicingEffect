@@ -73,7 +73,7 @@ python IsoImpact.py \
 
 Because this example compares human isoforms, it uses the human domain-coordinate file `data/human_domain.csv` by default.
 
-After the command finishes, IsoImpact writes the output figure to:
+After the command finishes, IsoImpact writes the output figure to table:
 
 ```text
 results/human_isoforms/IsoImpact_figure.png
@@ -125,17 +125,17 @@ python IsoImpact.py \
   -o results/mouse_isoforms
 ```
 
-Replace the example transcript IDs with the mouse isoforms to be compared. Because this example compares mouse isoforms, it uses the mouse domain-coordinate file `data/mouse_domain.csv`.
+Replace the example transcript IDs with the mouse isoforms to be compared. Because this example compares mouse isoforms, it uses the mouse domain-coordinate file `data/mouse_domain.csv` by default.
 
 ## 3. Building Domain Annotation Files for Novel Isoforms
 
-For novel isoforms (i.e., isoforms absent from the provided domain-coordinate CSV files), users can use the script/build_custom_domain.R script to build matching annotation files.
+For novel isoforms (i.e., isoforms absent from the provided domain-coordinate CSV files ， 例如新发现的人或小鼠isoform或者其他生物种类的isoform), users can use the 在script文件夹下的 build_custom_domain.R script to build matching annotation files.
 
 For this process, users need:
 
 ```text
-1. A CDS-aware GTF file.
-2. Pfam/PfamScan domain-prediction results for the corresponding protein sequences.
+1. A CDS-aware GTF file.（写的清楚一点，我的这个gtf文件究竟是要什么，感觉这个cds-aware不清晰）
+2. Pfam/PfamScan domain-prediction results for the corresponding protein sequences.（写清楚一点，相应蛋白质pfam结果可以写更清楚点，比如，要测试的新颖isoform对应的蛋白质pfam结果）
 ```
 
 The GTF file must contain CDS records, because the helper script maps protein-domain intervals back to genomic CDS coordinates. The protein IDs in the Pfam/PfamScan result file must match the `protein_id` values in the GTF file.
@@ -152,9 +152,9 @@ Build an IsoImpact-compatible domain-coordinate file:
 
 ```bash
 Rscript scripts/build_custom_domain.R \
-  --gtf your_isoforms.gtf \
-  --pfam your_pfam_results.txt \
-  --out custom_domain.csv
+  --gtf your_novel_isoforms.gtf \
+  --pfam your_novel_pfam_results.txt \
+  --out novel_custom_domain.csv
 ```
 
 Then run IsoImpact with the generated domain-coordinate file:
@@ -162,15 +162,15 @@ Then run IsoImpact with the generated domain-coordinate file:
 ```bash
 python IsoImpact.py \
   -i novel_tx_1 novel_tx_2 \
-  -g your_isoforms.gtf \
-  -f your_proteins.fa \
-  -d custom_domain.csv \
+  -g your_novel_isoforms.gtf \
+  -f your_novel_proteins.fa \
+  -d novel_custom_domain.csv \
   -o results/novel
 ```
 
 ## 4. Contact
 
-For questions, bug reports, or feature requests, please open a GitHub issue or contact the maintainers:
+For questions, bug reports, or feature requests, please open a GitHub issue or contact the maintainers:(写清楚点，尽量让什么都不懂得人，看字面意思就知道什么意思，而且用词要准确）
 
 - HeBinyu：hzb022119@163.com
 - LiHongdong：hongdong@csu.edu.cn
