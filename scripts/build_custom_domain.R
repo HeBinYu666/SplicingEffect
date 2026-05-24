@@ -1,6 +1,6 @@
 #!/usr/bin/env Rscript
 
-# Build a custom IsoImpact-compatible domain-coordinate CSV with official
+# Build an IsoImpact-compatible domain-coordinate CSV with official
 # ensembldb coordinate-mapping functions.
 # Required inputs:
 #   1. A CDS-aware GTF file whose protein_id values match the protein IDs used
@@ -17,9 +17,9 @@ suppressPackageStartupMessages({
 usage <- function() {
   cat(
     "Usage:\n",
-    "  Rscript scripts/build_custom_domain.R --gtf custom.gtf --pfam pfam_results.txt --out custom_domain.csv\n\n",
+    "  Rscript scripts/build_custom_domain.R --gtf annotation.gtf --pfam pfam_results.txt --out domain.csv\n\n",
     "Options:\n",
-    "  --gtf      CDS-aware GTF file for the custom annotation\n",
+    "  --gtf      CDS-aware GTF file for the target annotation version\n",
     "  --pfam     Pfam/PfamScan result table for the corresponding protein sequences\n",
     "  --out      Output CSV used by IsoImpact with -d/--domain\n",
     "  --sqlite   Optional temporary EnsDb sqlite file path\n",
