@@ -212,7 +212,7 @@ pfam_scan.pl \
   -outfile results/release109_notch2/NOTCH2_release109_pfam_results.txt
 ```
 
-If PfamScan and the Pfam database are already installed on a server, replace the program and database paths:
+If PfamScan and the Pfam database are already installed on your computer, replace the program and database paths:
 
 ```bash
 perl /path/to/pfam_scan.pl \
