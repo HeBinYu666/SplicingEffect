@@ -4,8 +4,8 @@
 # ensembldb coordinate-mapping functions.
 # Required inputs:
 #   1. A CDS-aware GTF file whose protein_id values match the protein IDs used
-#      in the Pfam/PfamScan results.
-#   2. A standard Pfam/PfamScan result table. The script expects protein ID,
+#      in the PfamScan results.
+#   2. A standard PfamScan result table. The script expects protein ID,
 #      domain start, domain end, Pfam ID, and domain name in the standard columns.
 
 suppressPackageStartupMessages({
@@ -20,7 +20,7 @@ usage <- function() {
     "  Rscript scripts/build_custom_domain.R --gtf annotation.gtf --pfam pfam_results.txt --out domain.csv\n\n",
     "Options:\n",
     "  --gtf      CDS-aware GTF file for the target annotation version\n",
-    "  --pfam     Pfam/PfamScan result table for the corresponding protein sequences\n",
+    "  --pfam     PfamScan result table for the corresponding protein sequences\n",
     "  --out      Output CSV used by IsoImpact with -d/--domain\n",
     "  --sqlite   Optional temporary EnsDb sqlite file path\n",
     "  --help     Show this message\n",
@@ -95,7 +95,7 @@ pfam_data <- read.table(PFAM_TXT, stringsAsFactors = FALSE, comment.char = "#", 
 if (nrow(pfam_data) == 0) stop("Pfam result file is empty or could not be parsed.", call. = FALSE)
 if (ncol(pfam_data) < 7) {
   stop(
-    "Pfam result file has fewer than seven columns. Expected standard Pfam/PfamScan output.",
+    "Pfam result file has fewer than seven columns. Expected standard PfamScan output.",
     call. = FALSE
   )
 }

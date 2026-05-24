@@ -149,9 +149,13 @@ BiocManager::install(c("ensembldb", "GenomicRanges"))
 install.packages("dplyr")
 ```
 
-The example below uses two NOTCH2 isoforms from Ensembl release 109.
+The example below uses two NOTCH2 isoforms from Ensembl release 109. To avoid running PfamScan on the full human proteome, this repository provides a small protein FASTA subset from Ensembl release 109:
 
-Step 1. Download the Ensembl release 109 human GTF and protein FASTA files:
+```text
+docs/example_release109/Homo_sapiens.GRCh38.pep.release109.subset.fa
+```
+
+Step 1. Download the Ensembl release 109 human GTF file:
 
 ```bash
 mkdir -p references
@@ -159,53 +163,45 @@ mkdir -p references
 curl -L -o references/Homo_sapiens.GRCh38.109.gtf.gz \
   https://ftp.ensembl.org/pub/release-109/gtf/homo_sapiens/Homo_sapiens.GRCh38.109.gtf.gz
 
-curl -L -o references/Homo_sapiens.GRCh38.pep.all.release109.fa.gz \
-  https://ftp.ensembl.org/pub/release-109/fasta/homo_sapiens/pep/Homo_sapiens.GRCh38.pep.all.fa.gz
-
 gunzip references/Homo_sapiens.GRCh38.109.gtf.gz
-gunzip references/Homo_sapiens.GRCh38.pep.all.release109.fa.gz
 ```
 
-Step 2. Extract the corresponding protein sequences and run PfamScan.
+Step 2. Install PfamScan and prepare the Pfam database. The Pfam database is large, so it is not included in this repository.
+
+```bash
+conda create -n pfamscan -c conda-forge -c bioconda pfam_scan hmmer -y
+conda activate pfamscan
+
+mkdir -p references/pfam
+
+curl -L -o references/pfam/Pfam-A.hmm.gz \
+  https://ftp.ebi.ac.uk/pub/databases/Pfam/current_release/Pfam-A.hmm.gz
+
+curl -L -o references/pfam/Pfam-A.hmm.dat.gz \
+  https://ftp.ebi.ac.uk/pub/databases/Pfam/current_release/Pfam-A.hmm.dat.gz
+
+curl -L -o references/pfam/active_site.dat.gz \
+  https://ftp.ebi.ac.uk/pub/databases/Pfam/current_release/active_site.dat.gz
+
+gunzip -f references/pfam/Pfam-A.hmm.gz
+gunzip -f references/pfam/Pfam-A.hmm.dat.gz
+gunzip -f references/pfam/active_site.dat.gz
+
+hmmpress references/pfam/Pfam-A.hmm
+```
+
+Step 3. Run PfamScan on the provided small protein FASTA subset:
 
 ```bash
 mkdir -p results/release109_notch2
 
-python - <<'PY'
-from pathlib import Path
-
-target_ids = {
-    "ENSP00000256646",
-    "ENSP00000499202",
-}
-
-input_fasta = Path("references/Homo_sapiens.GRCh38.pep.all.release109.fa")
-output_fasta = Path("results/release109_notch2/NOTCH2_release109_proteins.fa")
-
-current_id = None
-keep = False
-
-with input_fasta.open() as fin, output_fasta.open("w") as fout:
-    for line in fin:
-        if line.startswith(">"):
-            protein_id = line[1:].split()[0].split(".")[0]
-            keep = protein_id in target_ids
-            current_id = protein_id if keep else None
-        if keep:
-            fout.write(line)
-PY
-```
-
-Then run PfamScan on the extracted protein FASTA file. Replace `/path/to/pfam_scan.pl` and `/path/to/pfam_database` with the PfamScan program and database paths on your computer or server.
-
-```bash
-perl /path/to/pfam_scan.pl \
-  -fasta results/release109_notch2/NOTCH2_release109_proteins.fa \
-  -dir /path/to/pfam_database \
+pfam_scan.pl \
+  -fasta docs/example_release109/Homo_sapiens.GRCh38.pep.release109.subset.fa \
+  -dir references/pfam \
   -outfile results/release109_notch2/NOTCH2_release109_pfam_results.txt
 ```
 
-Step 3. Build an IsoImpact-compatible domain-coordinate file:
+Step 4. Build an IsoImpact-compatible domain-coordinate file:
 
 ```bash
 Rscript scripts/build_custom_domain.R \
@@ -214,13 +210,13 @@ Rscript scripts/build_custom_domain.R \
   --out results/release109_notch2/NOTCH2_release109_domain.csv
 ```
 
-Step 4. Run IsoImpact with the generated domain-coordinate file:
+Step 5. Run IsoImpact with the generated domain-coordinate file:
 
 ```bash
 python IsoImpact.py \
   -i ENST00000256646 ENST00000652302 \
   -g references/Homo_sapiens.GRCh38.109.gtf \
-  -f references/Homo_sapiens.GRCh38.pep.all.release109.fa \
+  -f docs/example_release109/Homo_sapiens.GRCh38.pep.release109.subset.fa \
   -d results/release109_notch2/NOTCH2_release109_domain.csv \
   -o results/release109_notch2
 ```
