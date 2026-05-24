@@ -1,14 +1,15 @@
 #!/usr/bin/env Rscript
 
-# Build an IsoImpact-compatible domain-coordinate CSV with official
-# ensembldb coordinate-mapping functions.
-# Required inputs:
-#   1. A CDS-aware GTF file whose protein_id values match the protein IDs used
-#      in the PfamScan results.
-#   2. A standard PfamScan result table. The script expects protein ID,
+# Build an IsoImpact-compatible domain-coordinate CSV using the official
+# AnnotationHub/EnsDb protein-to-genome mapping workflow.
+# Required input:
+#   1. A standard PfamScan result table. The script expects protein ID,
 #      domain start, domain end, Pfam ID, and domain name in the standard columns.
+#   2. Either an Ensembl release number with a matching EnsDb record in
+#      AnnotationHub, or a local EnsDb sqlite file.
 
 suppressPackageStartupMessages({
+  library(AnnotationHub)
   library(ensembldb)
   library(GenomicRanges)
   library(dplyr)
@@ -17,13 +18,15 @@ suppressPackageStartupMessages({
 usage <- function() {
   cat(
     "Usage:\n",
-    "  Rscript scripts/build_custom_domain.R --gtf annotation.gtf --pfam pfam_results.txt --out domain.csv\n\n",
+    "  Rscript scripts/build_custom_domain.R --pfam pfam_results.txt --out domain.csv --ensembl 110\n\n",
     "Options:\n",
-    "  --gtf      CDS-aware GTF file for the target annotation version\n",
-    "  --pfam     PfamScan result table for the corresponding protein sequences\n",
-    "  --out      Output CSV used by IsoImpact with -d/--domain\n",
-    "  --sqlite   Optional temporary EnsDb sqlite file path\n",
-    "  --help     Show this message\n",
+    "  --pfam      PfamScan result table for the corresponding protein sequences\n",
+    "  --out       Output CSV used by IsoImpact with -d/--domain\n",
+    "  --ensembl   Ensembl release number for AnnotationHub EnsDb lookup. Default: 110\n",
+    "  --species   Species name used in AnnotationHub query. Default: Homo sapiens\n",
+    "  --ensdb-sqlite  Optional local EnsDb sqlite file with protein annotations. If supplied, AnnotationHub is not used\n",
+    "  --gtf       Optional matching GTF path. Accepted for workflow consistency; not used for mapping\n",
+    "  --help      Show this message\n",
     sep = ""
   )
 }
@@ -41,69 +44,60 @@ get_arg <- function(flag, default = NULL) {
   args[[idx + 1]]
 }
 
-USER_GTF <- get_arg("--gtf")
 PFAM_TXT <- get_arg("--pfam")
 OUTPUT_CSV <- get_arg("--out", "custom_domain.csv")
-CUSTOM_SQLITE <- get_arg("--sqlite", sub("\\.csv$", ".sqlite", OUTPUT_CSV))
+ENSEMBL_RELEASE <- get_arg("--ensembl", "110")
+SPECIES <- get_arg("--species", "Homo sapiens")
+USER_GTF <- get_arg("--gtf")
+ENSDB_SQLITE <- get_arg("--ensdb-sqlite")
 
-if (is.null(USER_GTF) || is.null(PFAM_TXT)) {
+if (is.null(PFAM_TXT)) {
   usage()
-  stop("--gtf and --pfam are required.", call. = FALSE)
+  stop("--pfam is required.", call. = FALSE)
 }
 
-message("[IsoImpact] Checking custom GTF...")
-if (!file.exists(USER_GTF)) stop("GTF file not found: ", USER_GTF, call. = FALSE)
-
-open_gtf <- if (grepl("\\.gz$", USER_GTF, ignore.case = TRUE)) gzfile else file
-con <- open_gtf(USER_GTF, open = "rt")
-on.exit(close(con), add = TRUE)
-
-cds_count <- 0L
-repeat {
-  lines <- readLines(con, n = 100000, warn = FALSE)
-  if (!length(lines)) break
-  cds_count <- cds_count + sum(grepl("\tCDS\t", lines, fixed = TRUE))
+if (!is.null(USER_GTF)) {
+  message("[IsoImpact] Matching GTF supplied for the downstream IsoImpact run: ", USER_GTF)
 }
 
-if (is.na(cds_count) || cds_count == 0) {
-  stop(
-    "The GTF file does not contain CDS records. proteinToGenome requires CDS ",
-    "coordinates. Add CDS annotation first, for example with TransDecoder or gffread.",
-    call. = FALSE
-  )
+if (!is.null(ENSDB_SQLITE)) {
+  message("[IsoImpact] Loading local EnsDb sqlite file: ", ENSDB_SQLITE)
+  if (!file.exists(ENSDB_SQLITE)) stop("EnsDb sqlite file not found: ", ENSDB_SQLITE, call. = FALSE)
+  edb <- EnsDb(ENSDB_SQLITE)
+} else {
+  message("[IsoImpact] Loading EnsDb from AnnotationHub...")
+  message("[IsoImpact] Species: ", SPECIES)
+  message("[IsoImpact] Ensembl release: ", ENSEMBL_RELEASE)
+
+  ah <- AnnotationHub()
+  query_result <- query(ah, c("EnsDb", SPECIES, ENSEMBL_RELEASE))
+  if (length(query_result) == 0) {
+    stop(
+      "No matching EnsDb record was found in AnnotationHub for species '",
+      SPECIES, "' and Ensembl release '", ENSEMBL_RELEASE, "'.",
+      call. = FALSE
+    )
+  }
+  edb <- query_result[[1]]
+  message("[IsoImpact] EnsDb loaded: ", names(query_result)[1])
 }
-message("[IsoImpact] CDS records detected: ", cds_count)
 
-message("[IsoImpact] Building temporary EnsDb database...")
-if (file.exists(CUSTOM_SQLITE)) file.remove(CUSTOM_SQLITE)
-
-suppressMessages({
-  ensDbFromGtf(
-    USER_GTF,
-    outfile = CUSTOM_SQLITE,
-    organism = "Custom_species",
-    genomeVersion = "Custom_v1",
-    version = 1
-  )
-})
-custom_db <- EnsDb(CUSTOM_SQLITE)
-
-message("[IsoImpact] Reading Pfam results...")
-if (!file.exists(PFAM_TXT)) stop("Pfam result file not found: ", PFAM_TXT, call. = FALSE)
+message("[IsoImpact] Reading PfamScan results...")
+if (!file.exists(PFAM_TXT)) stop("PfamScan result file not found: ", PFAM_TXT, call. = FALSE)
 
 pfam_data <- read.table(PFAM_TXT, stringsAsFactors = FALSE, comment.char = "#", fill = TRUE)
-if (nrow(pfam_data) == 0) stop("Pfam result file is empty or could not be parsed.", call. = FALSE)
+if (nrow(pfam_data) == 0) stop("PfamScan result file is empty or could not be parsed.", call. = FALSE)
 if (ncol(pfam_data) < 7) {
   stop(
-    "Pfam result file has fewer than seven columns. Expected standard PfamScan output.",
+    "PfamScan result file has fewer than seven columns. Expected standard PfamScan output.",
     call. = FALSE
   )
 }
 
-message("[IsoImpact] Pfam records detected: ", nrow(pfam_data))
+message("[IsoImpact] PfamScan records detected: ", nrow(pfam_data))
 
 results <- list()
-valid_count <- 0
+valid_count <- 0L
 
 for (i in seq_len(nrow(pfam_data))) {
   row <- pfam_data[i, ]
@@ -124,13 +118,13 @@ for (i in seq_len(nrow(pfam_data))) {
   suppressWarnings(suppressMessages({
     tryCatch({
       protein_range <- IRanges(start = pfam_start, end = pfam_end, names = protein_id_no_version)
-      genomic_coords <- proteinToGenome(protein_range, db = custom_db)
+      genomic_coords <- proteinToGenome(protein_range, db = edb)
     }, error = function(e) {})
 
     if (is.null(genomic_coords) || length(genomic_coords) == 0) {
       tryCatch({
         protein_range <- IRanges(start = pfam_start, end = pfam_end, names = prot_id_raw)
-        genomic_coords <- proteinToGenome(protein_range, db = custom_db)
+        genomic_coords <- proteinToGenome(protein_range, db = edb)
       }, error = function(e) {})
     }
   }))
@@ -144,7 +138,7 @@ for (i in seq_len(nrow(pfam_data))) {
     g_end <- max(end(gr))
     blocks <- paste(start(gr), end(gr), sep = "-", collapse = ";")
 
-    valid_count <- valid_count + 1
+    valid_count <- valid_count + 1L
     results[[valid_count]] <- data.frame(
       Protein_ID = protein_id_no_version,
       Domain_ID = domain_id,
@@ -159,7 +153,7 @@ for (i in seq_len(nrow(pfam_data))) {
   }
 
   if (i %% 1000 == 0) {
-    message("[IsoImpact] Processed ", i, " Pfam records; mapped domains: ", valid_count)
+    message("[IsoImpact] Processed ", i, " PfamScan records; mapped domains: ", valid_count)
   }
 }
 
@@ -173,9 +167,9 @@ if (valid_count > 0) {
   final_df_compat <- final_df[, c("Protein_ID", "Domain_ID", "Domain_Name", "Genomic_Start", "Genomic_End")]
   write.csv(final_df_compat, OUTPUT_CSV, row.names = FALSE)
 
-  message("[IsoImpact] Custom domain CSV written to: ", OUTPUT_CSV)
+  message("[IsoImpact] Domain CSV written to: ", OUTPUT_CSV)
   message("[IsoImpact] Full mapping table written to: ", full_csv_name)
   message("[IsoImpact] Mapped non-redundant domains: ", nrow(final_df_compat))
 } else {
-  warning("No Pfam domains could be mapped to genomic coordinates.")
+  warning("No PfamScan domains could be mapped to genomic coordinates.")
 }
