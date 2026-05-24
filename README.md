@@ -171,7 +171,9 @@ gunzip references/Homo_sapiens.GRCh38.109.gtf.gz
 gunzip references/Homo_sapiens.GRCh38.pep.all.release109.fa.gz
 ```
 
-Step 2. Install PfamScan and prepare the Pfam database. The Pfam database is large, so it is not included in this repository. If PfamScan and the Pfam database are already available on your computer or server, skip this installation step and use the existing paths in Step 3.
+Step 2. Install PfamScan, prepare the Pfam database, and run PfamScan on the provided small protein FASTA subset. The Pfam database is large, so it is not included in this repository. If PfamScan and the Pfam database are already available on your computer or server, skip the installation commands and use the existing paths when running PfamScan.
+
+Install PfamScan and prepare the Pfam database:
 
 ```bash
 conda create -n pfamscan -c conda-forge -c bioconda pfam_scan hmmer -y
@@ -195,7 +197,7 @@ gunzip -f references/pfam/active_site.dat.gz
 hmmpress references/pfam/Pfam-A.hmm
 ```
 
-Step 3. Run PfamScan on the provided small protein FASTA subset:
+Run PfamScan:
 
 ```bash
 mkdir -p results/release109_notch2
@@ -206,7 +208,7 @@ pfam_scan.pl \
   -outfile results/release109_notch2/NOTCH2_release109_pfam_results.txt
 ```
 
-For example, if PfamScan and the Pfam database are already installed on a server, replace the program and database paths in the command above:
+For example, if PfamScan and the Pfam database are already installed on a server, replace the program and database paths:
 
 ```bash
 perl /path/to/pfam_scan.pl \
@@ -217,7 +219,7 @@ perl /path/to/pfam_scan.pl \
 
 The PfamScan result can vary slightly across Pfam database releases. For reproducible analyses, use the same Pfam database version when comparing different isoform sets.
 
-Step 4. Build an IsoImpact-compatible domain-coordinate file:
+Step 3. Build an IsoImpact-compatible domain-coordinate file:
 
 ```bash
 Rscript scripts/build_custom_domain.R \
@@ -227,7 +229,7 @@ Rscript scripts/build_custom_domain.R \
   --ensembl 109
 ```
 
-Step 5. Run IsoImpact with the generated domain-coordinate file:
+Step 4. Run IsoImpact with the generated domain-coordinate file:
 
 ```bash
 python IsoImpact.py \
