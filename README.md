@@ -155,7 +155,7 @@ The example below uses two NOTCH2 isoforms from Ensembl release 109. To avoid ru
 docs/example_release109/Homo_sapiens.GRCh38.pep.release109.example.fa
 ```
 
-Step 1. Download the Ensembl release 109 human GTF file. The complete Ensembl release 109 protein FASTA file is also shown below for users who want to run PfamScan on their own selected protein sequences.
+Step 1. Download the Ensembl release 109 human GTF and protein FASTA files. The example below uses the small FASTA file provided in this repository, but the complete Ensembl release 109 protein FASTA download command is also shown for users who want to run PfamScan on other protein sequences from the same release.
 
 ```bash
 mkdir -p references
@@ -170,7 +170,7 @@ gunzip references/Homo_sapiens.GRCh38.109.gtf.gz
 gunzip references/Homo_sapiens.GRCh38.pep.all.release109.fa.gz
 ```
 
-Step 2. Install PfamScan and prepare the Pfam database. The Pfam database is large, so it is not included in this repository.
+Step 2. Install PfamScan, prepare the Pfam database, and run PfamScan on the provided small protein FASTA subset. The Pfam database is large, so it is not included in this repository. If PfamScan and the Pfam database are already available on your computer or server, use those existing paths in the `pfam_scan.pl` command instead of installing them again.
 
 ```bash
 conda create -n pfamscan -c conda-forge -c bioconda pfam_scan hmmer -y
@@ -192,11 +192,7 @@ gunzip -f references/pfam/Pfam-A.hmm.dat.gz
 gunzip -f references/pfam/active_site.dat.gz
 
 hmmpress references/pfam/Pfam-A.hmm
-```
 
-Step 3. Run PfamScan on the provided small protein FASTA subset:
-
-```bash
 mkdir -p results/release109_notch2
 
 pfam_scan.pl \
@@ -205,7 +201,18 @@ pfam_scan.pl \
   -outfile results/release109_notch2/NOTCH2_release109_pfam_results.txt
 ```
 
-Step 4. Build an IsoImpact-compatible domain-coordinate file:
+For example, if PfamScan and the Pfam database are already installed on a server, replace the program and database paths:
+
+```bash
+perl /path/to/pfam_scan.pl \
+  -fasta docs/example_release109/Homo_sapiens.GRCh38.pep.release109.example.fa \
+  -dir /path/to/pfam_database \
+  -outfile results/release109_notch2/NOTCH2_release109_pfam_results.txt
+```
+
+The PfamScan result can vary slightly across Pfam database releases. For reproducible analyses, use the same Pfam database version when comparing different isoform sets.
+
+Step 3. Build an IsoImpact-compatible domain-coordinate file:
 
 ```bash
 Rscript scripts/build_custom_domain.R \
@@ -214,7 +221,7 @@ Rscript scripts/build_custom_domain.R \
   --out results/release109_notch2/NOTCH2_release109_domain.csv
 ```
 
-Step 5. Run IsoImpact with the generated domain-coordinate file:
+Step 4. Run IsoImpact with the generated domain-coordinate file:
 
 ```bash
 python IsoImpact.py \
