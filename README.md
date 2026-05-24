@@ -127,7 +127,7 @@ python IsoImpact.py \
 
 Replace the example transcript IDs with the mouse isoforms to be compared. Because this example compares mouse isoforms, it uses the mouse domain-coordinate file `data/mouse_domain.csv` by default.
 
-## 3. Building Domain Annotation Files for Novel Isoforms
+## 3. Building Domain Annotation Files for Novel Isoforms(因为Novel Isoform无法验证是否真的可以，所以这个脚本只能改成是其他Emsembl 版本isoform，不能说用来给novel isoform用，因为如果是一个完全新发现的，那么，R包的数据库中没有这个信息，就无法跑出结果）
 
 For novel isoforms, including novel human or mouse isoforms and isoforms from other species, users can use the `build_custom_domain.R` script in the `scripts/` directory to build a matching domain-coordinate CSV file.
 
@@ -148,7 +148,11 @@ BiocManager::install(c("ensembldb", "GenomicRanges"))
 install.packages("dplyr")
 ```
 
-Build an IsoImpact-compatible domain-coordinate file:
+Step 1.获取gtf文件
+
+Step 2.跑pfam，获取pfam结果文件
+
+Step 3.Build an IsoImpact-compatible domain-coordinate file：
 
 ```bash
 Rscript scripts/build_custom_domain.R \
@@ -157,7 +161,7 @@ Rscript scripts/build_custom_domain.R \
   --out novel_custom_domain.csv
 ```
 
-Then run IsoImpact with the generated domain-coordinate file:
+Step 4.run IsoImpact with the generated domain-coordinate file：
 
 ```bash
 python IsoImpact.py \
@@ -167,6 +171,8 @@ python IsoImpact.py \
   -d novel_custom_domain.csv \
   -o results/novel
 ```
+
+加一个结果展示：和前面的一样，但是，我们用一个老一点的版本，跑一遍，证明即使老版本也可以。
 
 ## 4. Contact
 
