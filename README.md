@@ -149,10 +149,10 @@ BiocManager::install(c("AnnotationHub", "ensembldb", "GenomicRanges"))
 install.packages("dplyr")
 ```
 
-The example below uses two NOTCH2 isoforms from Ensembl release 109. To avoid running PfamScan on the full human proteome, this repository provides a small protein FASTA subset from Ensembl release 109:
+The example below uses two RERE isoforms from Ensembl release 109. To avoid running PfamScan on the full human proteome, this repository provides a small protein FASTA file containing the two example protein isoforms:
 
 ```text
-docs/example_release109/Homo_sapiens.GRCh38.pep.release109.example.fa
+docs/example_release109/RERE_release109.fa
 ```
 
 Step 1. Download the Ensembl release 109 human GTF file. To save time, the example workflow below uses the small protein FASTA subset already provided in this repository. Users only need to download the complete Ensembl release 109 protein FASTA file if they want to run PfamScan on additional protein sequences from the same release.
@@ -204,21 +204,21 @@ hmmpress references/pfam/Pfam-A.hmm
 Run PfamScan:
 
 ```bash
-mkdir -p results/release109_notch2
+mkdir -p results/release109_rere
 
 pfam_scan.pl \
-  -fasta docs/example_release109/Homo_sapiens.GRCh38.pep.release109.example.fa \
+  -fasta docs/example_release109/RERE_release109.fa \
   -dir references/pfam \
-  -outfile results/release109_notch2/NOTCH2_release109_pfam_results.txt
+  -outfile results/release109_rere/RERE_release109_pfam_results.txt
 ```
 
 If PfamScan and the Pfam database are already installed on your computer, replace the program and database paths:
 
 ```bash
 perl /path/to/pfam_scan.pl \
-  -fasta docs/example_release109/Homo_sapiens.GRCh38.pep.release109.example.fa \
+  -fasta docs/example_release109/RERE_release109.fa \
   -dir /path/to/pfam_database \
-  -outfile results/release109_notch2/NOTCH2_release109_pfam_results.txt
+  -outfile results/release109_rere/RERE_release109_pfam_results.txt
 ```
 
 Step 3. Build an IsoImpact-compatible domain-coordinate file:
@@ -226,8 +226,8 @@ Step 3. Build an IsoImpact-compatible domain-coordinate file:
 ```bash
 Rscript scripts/build_custom_domain.R \
   --gtf references/Homo_sapiens.GRCh38.109.gtf \
-  --pfam results/release109_notch2/NOTCH2_release109_pfam_results.txt \
-  --out results/release109_notch2/NOTCH2_release109_domain.csv \
+  --pfam results/release109_rere/RERE_release109_pfam_results.txt \
+  --out results/release109_rere/RERE_release109_domain.csv \
   --ensembl 109
 ```
 
@@ -235,32 +235,34 @@ Step 4. Run IsoImpact with the generated domain-coordinate file:
 
 ```bash
 python IsoImpact.py \
-  -i ENST00000256646 ENST00000652302 \
+  -i ENST00000400908 ENST00000400907 \
   -g references/Homo_sapiens.GRCh38.109.gtf \
-  -f docs/example_release109/Homo_sapiens.GRCh38.pep.release109.example.fa \
-  -d results/release109_notch2/NOTCH2_release109_domain.csv \
-  -o results/release109_notch2
+  -f docs/example_release109/RERE_release109.fa \
+  -d results/release109_rere/RERE_release109_domain.csv \
+  -o results/release109_rere
 ```
 
 After the command finishes, IsoImpact writes the output figure to:
 
 ```text
-results/release109_notch2/IsoImpact_figure.png
+results/release109_rere/IsoImpact_figure.png
 ```
 
-`IsoImpact_figure.png` contains the domain-mapping visualization and ranked feature-difference plot for the input isoforms.
+`IsoImpact_figure.png` contains the domain-mapping visualization and ranked feature-difference plot for the input isoforms. An example output figure from the two release 109 RERE isoforms is shown below. The example figure is available as [`docs/example_release109/RERE_release109_IsoImpact_figure.png`](docs/example_release109/RERE_release109_IsoImpact_figure.png).
 
-[Add the generated `IsoImpact_figure.png` here.]
+![IsoImpact release 109 RERE example output figure](docs/example_release109/RERE_release109_IsoImpact_figure.png)
 
 IsoImpact also writes the feature matrix to:
 
 ```text
-results/release109_notch2/IsoImpact_features.csv
+results/release109_rere/IsoImpact_features.csv
 ```
 
-`IsoImpact_features.csv` contains gene and transcript information, protein features, genomic span, and domain comparison results.
+`IsoImpact_features.csv` contains gene and transcript information, protein features, genomic span, and domain comparison results. An example feature-matrix preview from the two release 109 RERE isoforms is shown below. The complete example table is available as [`docs/example_release109/RERE_release109_IsoImpact_features.csv`](docs/example_release109/RERE_release109_IsoImpact_features.csv).
 
-[Add a preview of the generated `IsoImpact_features.csv` here.]
+| Gene ID | Canonical transcript | Alternative transcript | Alternative domains | Lost domains | Gained domains | Total domain change |
+| --- | --- | --- | --- | --- | --- | ---: |
+| ENSG00000142599 | ENST00000400908 | ENST00000400907 | BAH; ELM2; Myb_DNA-binding; Atrophin-1 | GATA | Myb_DNA-binding | 2 |
 
 ## 4. Contact
 
