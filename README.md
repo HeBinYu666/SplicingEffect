@@ -152,10 +152,10 @@ install.packages("dplyr")
 The example below uses two NOTCH2 isoforms from Ensembl release 109. To avoid running PfamScan on the full human proteome, this repository provides a small protein FASTA subset from Ensembl release 109:
 
 ```text
-docs/example_release109/Homo_sapiens.GRCh38.pep.release109.subset.fa
+docs/example_release109/Homo_sapiens.GRCh38.pep.release109.example.fa
 ```
 
-Step 1. Download the Ensembl release 109 human GTF file:
+Step 1. Download the Ensembl release 109 human GTF file. The complete Ensembl release 109 protein FASTA file is also shown below for users who want to run PfamScan on their own selected protein sequences.
 
 ```bash
 mkdir -p references
@@ -163,7 +163,11 @@ mkdir -p references
 curl -L -o references/Homo_sapiens.GRCh38.109.gtf.gz \
   https://ftp.ensembl.org/pub/release-109/gtf/homo_sapiens/Homo_sapiens.GRCh38.109.gtf.gz
 
+curl -L -o references/Homo_sapiens.GRCh38.pep.all.release109.fa.gz \
+  https://ftp.ensembl.org/pub/release-109/fasta/homo_sapiens/pep/Homo_sapiens.GRCh38.pep.all.fa.gz
+
 gunzip references/Homo_sapiens.GRCh38.109.gtf.gz
+gunzip references/Homo_sapiens.GRCh38.pep.all.release109.fa.gz
 ```
 
 Step 2. Install PfamScan and prepare the Pfam database. The Pfam database is large, so it is not included in this repository.
@@ -196,7 +200,7 @@ Step 3. Run PfamScan on the provided small protein FASTA subset:
 mkdir -p results/release109_notch2
 
 pfam_scan.pl \
-  -fasta docs/example_release109/Homo_sapiens.GRCh38.pep.release109.subset.fa \
+  -fasta docs/example_release109/Homo_sapiens.GRCh38.pep.release109.example.fa \
   -dir references/pfam \
   -outfile results/release109_notch2/NOTCH2_release109_pfam_results.txt
 ```
@@ -216,7 +220,7 @@ Step 5. Run IsoImpact with the generated domain-coordinate file:
 python IsoImpact.py \
   -i ENST00000256646 ENST00000652302 \
   -g references/Homo_sapiens.GRCh38.109.gtf \
-  -f docs/example_release109/Homo_sapiens.GRCh38.pep.release109.subset.fa \
+  -f docs/example_release109/Homo_sapiens.GRCh38.pep.release109.example.fa \
   -d results/release109_notch2/NOTCH2_release109_domain.csv \
   -o results/release109_notch2
 ```

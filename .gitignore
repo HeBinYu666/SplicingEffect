@@ -21,7 +21,7 @@ venv/
 !docs/example_output/IsoImpact_features.csv
 !docs/example_output/IsoImpact_figure.png
 !docs/example_release109/
-!docs/example_release109/Homo_sapiens.GRCh38.pep.release109.subset.fa
+!docs/example_release109/Homo_sapiens.GRCh38.pep.release109.example.fa
 !data/
 !data/human_domain.csv
 !data/mouse_domain.csv
