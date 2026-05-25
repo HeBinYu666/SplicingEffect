@@ -149,7 +149,7 @@ BiocManager::install(c("AnnotationHub", "ensembldb", "GenomicRanges"))
 install.packages("dplyr")
 ```
 
-Step 1. Download the Ensembl release version 109 human GTF file. To avoid running PfamScan on the complete human protein FASTA file, which can take a long time, this repository provides a small protein FASTA file for the example workflow:
+Step 1. Download the Ensembl release version 109 human GTF file. At the same time, to avoid running PfamScan on the complete human protein FASTA file, which can take a long time, this repository provides a small protein FASTA file for the example workflow. The workflow below uses this small FASTA file:
 
 ```text
 docs/example_release109/Homo_sapiens.GRCh38.pep.release109.example.fa
@@ -166,7 +166,7 @@ curl -L -o references/Homo_sapiens.GRCh38.109.gtf.gz \
 gunzip references/Homo_sapiens.GRCh38.109.gtf.gz
 ```
 
-If users want to run PfamScan with the complete Ensembl release version 109 protein FASTA file instead of the small example FASTA file, the complete FASTA file can be downloaded with:
+If users want to run PfamScan with the complete Ensembl release version 109 protein FASTA file instead of the small example FASTA file, the complete FASTA file can be downloaded with the following command. In that case, the FASTA paths in the PfamScan and IsoImpact commands below should also be changed to `references/Homo_sapiens.GRCh38.pep.all.release109.fa`:
 
 ```bash
 curl -L -o references/Homo_sapiens.GRCh38.pep.all.release109.fa.gz \
