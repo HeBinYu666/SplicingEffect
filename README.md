@@ -149,7 +149,7 @@ BiocManager::install(c("AnnotationHub", "ensembldb", "GenomicRanges"))
 install.packages("dplyr")
 ```
 
-Step 1. Download the Ensembl release version 109 human GTF file. The example below uses two RERE isoforms from Ensembl release version 109. To avoid running PfamScan on the complete human protein FASTA file, which can take a long time, this repository provides a small protein FASTA file containing the two RERE example protein isoforms and additional reference protein sequences. The following steps use this small FASTA file to run the example workflow:
+Step 1. Download the Ensembl release version 109 human GTF file. To avoid running PfamScan on the complete human protein FASTA file, which can take a long time, this repository provides a small protein FASTA file for the example workflow:
 
 ```text
 docs/example_release109/Homo_sapiens.GRCh38.pep.release109.example.fa
@@ -231,7 +231,7 @@ Rscript scripts/build_custom_domain.R \
   --ensembl 109
 ```
 
-Step 4. Run IsoImpact with the generated domain-coordinate file:
+Step 4. Run IsoImpact with two human Ensembl transcript IDs from **RERE** (**ENSG00000142599**) and the generated domain-coordinate file:
 
 ```bash
 python IsoImpact.py \
