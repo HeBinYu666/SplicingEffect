@@ -39,7 +39,7 @@ IsoImpact uses the following command-line inputs:
 -o / --outdir    Directory where output files will be saved. The default is the current directory.
 ```
 
-The transcript IDs (`-i`) must match the supplied GTF file. The GTF file (`-g`) provides transcript, exon, CDS, UTR, gene, and protein ID annotations for the selected isoforms. The protein FASTA file (`-f`) provides the corresponding amino acid sequences. The domain-coordinate CSV file (`-d`) provides the protein-domain annotations used for domain comparison and visualization. For standard human and mouse analyses, IsoImpact provides pre-built domain-coordinate CSV files under the `data/` directory.
+The transcript IDs (`-i`) must match the supplied GTF file. The GTF file (`-g`) provides transcript, exon, CDS, UTR, gene, and protein ID annotations for the selected isoforms. The protein FASTA file (`-f`) provides the corresponding amino acid sequences. The domain-coordinate CSV file (`-d`) provides the protein-domain annotations used for domain comparison and visualization. For human and mouse analyses, IsoImpact provides pre-built domain-coordinate CSV files under the `data/` directory.
 
 These pre-built human and mouse domain-coordinate CSV files were generated from Ensembl release version 110, so the human and mouse examples below use Ensembl release version 110 GTF and protein FASTA files to keep transcript IDs, protein IDs, genomic coordinates, and domain annotations consistent. Other Ensembl release versions can also be used after generating a matching domain-coordinate CSV file from the same annotation version.
 
@@ -129,7 +129,7 @@ Replace the example transcript IDs with the mouse isoforms to be compared. Becau
 
 ## 3. Building Domain-Coordinate CSV Files for Other Ensembl Release Versions
 
-For isoforms annotated in Ensembl release versions other than Ensembl release version 110, users can use the `build_custom_domain.R` script in the `scripts/` directory to build a matching domain-coordinate CSV file. The generated CSV file should be used together with the GTF and protein FASTA files from the same Ensembl release version.
+For isoforms annotated in Ensembl release versions other than Ensembl release version 110, users can use the `build_custom_domain.R` script in the `scripts/` directory to build a matching domain-coordinate CSV file. The generated CSV file should be used together with the GTF and protein FASTA files from the same Ensembl release version. The example below uses Ensembl release version 109 to demonstrate this process.
 
 For this process, users need:
 
@@ -149,13 +149,13 @@ BiocManager::install(c("AnnotationHub", "ensembldb", "GenomicRanges"))
 install.packages("dplyr")
 ```
 
-Step 1. Download the Ensembl release version 109 human GTF file. The example below uses two RERE isoforms from Ensembl release version 109. To avoid running PfamScan on the complete human protein FASTA file, which can take a long time, this repository provides a small protein FASTA file containing only the two example protein isoforms:
+Step 1. Download the Ensembl release version 109 human GTF file. The example below uses two RERE isoforms from Ensembl release version 109. To avoid running PfamScan on the complete human protein FASTA file, which can take a long time, this repository provides a small protein FASTA file containing the two RERE example protein isoforms and additional reference protein sequences. The following steps use this small FASTA file to run the example workflow:
 
 ```text
-docs/example_release109/RERE_release109.fa
+docs/example_release109/Homo_sapiens.GRCh38.pep.release109.example.fa
 ```
 
-Users only need to download the complete Ensembl release version 109 protein FASTA file if they want to run PfamScan on additional protein sequences from the same release version.
+Download the matching Ensembl release version 109 human GTF file:
 
 ```bash
 mkdir -p references
@@ -166,7 +166,7 @@ curl -L -o references/Homo_sapiens.GRCh38.109.gtf.gz \
 gunzip references/Homo_sapiens.GRCh38.109.gtf.gz
 ```
 
-Optional command for downloading the complete Ensembl release version 109 protein FASTA file:
+If users want to run PfamScan with the complete Ensembl release version 109 protein FASTA file instead of the small example FASTA file, the complete FASTA file can be downloaded with:
 
 ```bash
 curl -L -o references/Homo_sapiens.GRCh38.pep.all.release109.fa.gz \
@@ -207,7 +207,7 @@ Run PfamScan:
 mkdir -p results/release109_rere
 
 pfam_scan.pl \
-  -fasta docs/example_release109/RERE_release109.fa \
+  -fasta docs/example_release109/Homo_sapiens.GRCh38.pep.release109.example.fa \
   -dir references/pfam \
   -outfile results/release109_rere/RERE_release109_pfam_results.txt
 ```
@@ -216,7 +216,7 @@ If PfamScan and the Pfam database are already installed on your computer, replac
 
 ```bash
 perl /path/to/pfam_scan.pl \
-  -fasta docs/example_release109/RERE_release109.fa \
+  -fasta docs/example_release109/Homo_sapiens.GRCh38.pep.release109.example.fa \
   -dir /path/to/pfam_database \
   -outfile results/release109_rere/RERE_release109_pfam_results.txt
 ```
@@ -237,7 +237,7 @@ Step 4. Run IsoImpact with the generated domain-coordinate file:
 python IsoImpact.py \
   -i ENST00000400908 ENST00000400907 \
   -g references/Homo_sapiens.GRCh38.109.gtf \
-  -f docs/example_release109/RERE_release109.fa \
+  -f docs/example_release109/Homo_sapiens.GRCh38.pep.release109.example.fa \
   -d results/release109_rere/RERE_release109_domain.csv \
   -o results/release109_rere
 ```
