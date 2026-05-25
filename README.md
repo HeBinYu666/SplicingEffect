@@ -127,7 +127,7 @@ python IsoImpact.py \
 
 Replace the example transcript IDs with the mouse isoforms to be compared. Because this example compares mouse isoforms, it uses the mouse domain-coordinate file `data/mouse_domain.csv` by default.
 
-## 3. Building Domain-Coordinate CSV Files for Other Ensembl Versions
+## 3. Building Domain-Coordinate CSV Files for Other Ensembl Release Versions
 
 For isoforms annotated in Ensembl releases other than release 110, users can use the `build_custom_domain.R` script in the `scripts/` directory to build a matching domain-coordinate CSV file. The generated CSV file should be used together with the GTF and protein FASTA files from the same Ensembl release.
 
@@ -149,7 +149,7 @@ BiocManager::install(c("AnnotationHub", "ensembldb", "GenomicRanges"))
 install.packages("dplyr")
 ```
 
-Step 1. Download the Ensembl release 109 human GTF file. The example below uses two RERE isoforms from Ensembl release 109. To save time, this repository provides a small protein FASTA file containing the two example protein isoforms:
+Step 1. Download the Ensembl release 109 human GTF file. The example below uses two RERE isoforms from Ensembl release 109. To avoid running PfamScan on the complete human protein FASTA file, which can take a long time, this repository provides a small protein FASTA file containing only the two example protein isoforms:
 
 ```text
 docs/example_release109/RERE_release109.fa
