@@ -127,7 +127,7 @@ python IsoImpact.py \
 
 Replace the example transcript IDs with the mouse isoforms to be compared. Because this example compares mouse isoforms, it uses the mouse domain-coordinate file `data/mouse_domain.csv` by default.
 
-## 3. Building Domain-Coordinate CSV Files for Other Ensembl Releases
+## 3. Building Domain-Coordinate CSV Files for Other Ensembl Versions
 
 For isoforms annotated in Ensembl releases other than release 110, users can use the `build_custom_domain.R` script in the `scripts/` directory to build a matching domain-coordinate CSV file. The generated CSV file should be used together with the GTF and protein FASTA files from the same Ensembl release.
 
@@ -149,13 +149,13 @@ BiocManager::install(c("AnnotationHub", "ensembldb", "GenomicRanges"))
 install.packages("dplyr")
 ```
 
-The example below uses two RERE isoforms from Ensembl release 109. To avoid running PfamScan on the full human proteome, this repository provides a small protein FASTA file containing the two example protein isoforms:
+Step 1. Download the Ensembl release 109 human GTF file. The example below uses two RERE isoforms from Ensembl release 109. To save time, this repository provides a small protein FASTA file containing the two example protein isoforms:
 
 ```text
 docs/example_release109/RERE_release109.fa
 ```
 
-Step 1. Download the Ensembl release 109 human GTF file. To save time, the example workflow below uses the small protein FASTA subset already provided in this repository. Users only need to download the complete Ensembl release 109 protein FASTA file if they want to run PfamScan on additional protein sequences from the same release.
+Users only need to download the complete Ensembl release 109 protein FASTA file if they want to run PfamScan on additional protein sequences from the same release.
 
 ```bash
 mkdir -p references
@@ -175,7 +175,7 @@ curl -L -o references/Homo_sapiens.GRCh38.pep.all.release109.fa.gz \
 gunzip references/Homo_sapiens.GRCh38.pep.all.release109.fa.gz
 ```
 
-Step 2. Install PfamScan, prepare the Pfam database, and run PfamScan on the provided small protein FASTA subset. The Pfam database is large, so it is not included in this repository. If PfamScan and the Pfam database are already available on your computer or server, skip the installation commands and use the existing paths when running PfamScan.
+Step 2. Install PfamScan, prepare the Pfam database, and run PfamScan on the provided small protein FASTA subset. The Pfam database is large, so it is not included in this repository. If PfamScan and the Pfam database are already available on your computer, skip the installation commands and use the existing paths when running PfamScan.
 
 Install PfamScan and prepare the Pfam database:
 
