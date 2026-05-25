@@ -12,7 +12,7 @@ usage <- function() {
     "Options:\n",
     "  --pfam      PfamScan result table\n",
     "  --out       Output domain-coordinate CSV used by IsoImpact with -d/--domain\n",
-    "  --ensembl   Ensembl release number for the AnnotationHub EnsDb query. Default: 110\n",
+    "  --ensembl   Ensembl release version number for the AnnotationHub EnsDb query. Default: 110\n",
     "  --species   Species name for the AnnotationHub EnsDb query. Default: Homo sapiens\n",
     "  --gtf       Optional matching GTF path for record keeping; the mapping uses AnnotationHub EnsDb\n",
     "  --help      Show this message\n",
