@@ -30,10 +30,10 @@ parser = argparse.ArgumentParser(
 group = parser.add_mutually_exclusive_group(required=True)
 group.add_argument(
     "-i", "--isoform", nargs="+",
-    help="Compare at least two transcript IDs, for example: -i ENST1 ENST2"
+    help="Compare at least two isoform IDs, for example: -i ENST1 ENST2"
 )
 group.add_argument(
-    "-q", "--query-exon", nargs=3, metavar=("TRANSCRIPT_ID", "START", "END"),
+    "-q", "--query-exon", nargs=3, metavar=("ISOFORM_ID", "START", "END"),
     help="Query domains overlapping one exon, for example: -q ENST1 1000 2000"
 )
 
@@ -170,7 +170,7 @@ if args.query_exon:
 if args.isoform:
     INPUT_TXS = args.isoform
     if len(INPUT_TXS) < 2:
-        print("Error: isoform comparison mode requires at least two transcript IDs.")
+        print("Error: isoform comparison mode requires at least two isoform IDs.")
         exit(1)
 
 os.makedirs(OUT_DIR, exist_ok=True)
@@ -298,14 +298,14 @@ if os.path.exists(GTF_FILE):
 missing_txs = [tx for tx in INPUT_TXS if tx_info[tx]['span_start'] == float('inf')]
 if missing_txs:
     parser.error(
-        "The following transcript ID(s) were not found in the GTF exon records: "
+        "The following isoform ID(s) were not found in the GTF exon records: "
         + ", ".join(missing_txs)
     )
 
 missing_proteins = [tx for tx in INPUT_TXS if not tx_info[tx]['protein_id']]
 if missing_proteins:
     parser.error(
-        "The following transcript ID(s) do not have protein_id annotations in the GTF: "
+        "The following isoform ID(s) do not have protein_id annotations in the GTF: "
         + ", ".join(missing_proteins)
     )
 
@@ -393,7 +393,7 @@ for alt_tx in alt_txs:
 
 df_all_features = pd.DataFrame(rows)
 if df_all_features.empty:
-    print("Error: no isoform comparison rows were generated. Please check transcript IDs, GTF, FASTA, and domain files.")
+    print("Error: no isoform comparison rows were generated. Please check isoform IDs, GTF, FASTA, and domain files.")
     exit(1)
 
 delta_cols = [c for c in df_all_features.columns if c.startswith('Delta_')]
@@ -500,7 +500,7 @@ ax_a.set_title('A', loc='left', fontsize=22, fontweight='bold', pad=10)
 
 H_utr, H_cds, H_domain = 0.20, 0.40, 0.55
 
-# Use one shared left label anchor to keep transcript labels aligned.
+# Use one shared left label anchor to keep isoform labels aligned.
 global_min_x = float('inf')
 for tx in all_txs_to_plot:
     if exons_dict[tx]: global_min_x = min(global_min_x, map_pos(exons_dict[tx][0]['start']))
