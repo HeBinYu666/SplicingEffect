@@ -149,8 +149,6 @@ install.packages("dplyr")
 
 Step 1. Prepare the GTF and protein FASTA files.
 
-This step prepares the matching GTF and protein FASTA files for the Ensembl release version 109 RERE gene demonstration.
-
 First, download the Ensembl release version 109 human GTF file:
 
 ```bash
@@ -173,8 +171,6 @@ If users want to run the process on the full proteome, they can also download th
 ```text
 https://ftp.ensembl.org/pub/release-109/fasta/homo_sapiens/pep/Homo_sapiens.GRCh38.pep.all.fa.gz
 ```
-
-If the complete FASTA file is used, replace the FASTA path in the PfamScan and IsoImpact commands below with the path to the complete file.
 
 Step 2. Generate PfamScan domain-prediction results.
 
