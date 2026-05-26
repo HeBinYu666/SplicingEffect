@@ -168,7 +168,7 @@ Second, use the FASTA file provided in this repository, which contains a small s
 data/example_release109/Homo_sapiens.GRCh38.pep.release109.example.fa
 ```
 
-Third, users can download the complete Ensembl release version 109 human protein FASTA file from Ensembl if they want to run the process on the full proteome:
+If users want to run the process on the full proteome, they can also download the complete Ensembl release version 109 human protein FASTA file from Ensembl:
 
 ```text
 https://ftp.ensembl.org/pub/release-109/fasta/homo_sapiens/pep/Homo_sapiens.GRCh38.pep.all.fa.gz

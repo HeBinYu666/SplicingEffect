@@ -561,6 +561,7 @@ ax_a.legend(handles=legend_elements, loc='center left', bbox_to_anchor=(1.01, 0.
 
 # ==================== [B] Ranked signed feature differences ====================
 ax_new = fig.add_subplot(gs[1, :])
+ax_new.set_title('B', loc='left', fontsize=22, fontweight='bold', pad=10)
 
 if not df_all_features.empty:
     mean_delta = df_all_features[delta_cols].mean(axis=0)
