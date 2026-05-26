@@ -160,7 +160,7 @@ curl -L -o references/Homo_sapiens.GRCh38.109.gtf.gz \
 gunzip references/Homo_sapiens.GRCh38.109.gtf.gz
 ```
 
-Second, use the FASTA file provided in this repository, which contains a small subset of protein sequences:
+Second, to reduce the running time of the example workflow, use the FASTA file provided in this repository, which contains a small subset of protein sequences:
 
 ```text
 data/example_release109/Homo_sapiens.GRCh38.pep.release109.example.fa
