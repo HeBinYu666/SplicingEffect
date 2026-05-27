@@ -1,6 +1,6 @@
 # IsoImpact
 
-IsoImpact is an automated tool to evaluate the functional impact of alternative splicing based on isoform sequences. It integrates domain visualization across selected isoforms, protein feature extraction, and feature-difference analysis into a unified automated workflow.
+IsoImpact is an automated tool to evaluate the functional impact of alternative splicing based on isoform sequences. It integrates domain visualization across selected isoforms, protein feature analysis into a unified automated workflow.
 
 ## 1. Installation
 
@@ -29,7 +29,7 @@ pip install -r requirements.txt
 
 ## 2. Command-line options
 
-IsoImpact uses the following command-line inputs:
+IsoImpact implements the following input options:
 
 ```text
 -i / --isoform   Ensembl isoform IDs to be compared. At least two isoform IDs are required.
@@ -39,11 +39,11 @@ IsoImpact uses the following command-line inputs:
 -o / --outdir    Directory where output files will be saved. The default is the current directory.
 ```
 
-The isoform IDs (`-i`) must match the supplied GTF file. The GTF file (`-g`) provides isoform, exon, CDS, UTR, gene, and protein ID annotations for the selected isoforms. The protein FASTA file (`-f`) provides the corresponding amino acid sequences. The domain-coordinate file (`-d`) provides the protein-domain annotations used for domain comparison and visualization. For human and mouse analyses, IsoImpact provides pre-built domain-coordinate files under the `data/` directory.
+The isoform IDs (`-i`) must match the supplied GTF file. The GTF file (`-g`) provides isoform, exon, CDS, UTR, gene, and protein ID annotations for the selected isoforms. The protein FASTA file (`-f`) provides the corresponding amino acid sequences. The domain-coordinate file (`-d`) provides the protein-domain annotations used for domain mapping and visualization. For human and mouse analyses, IsoImpact provides pre-built domain-coordinate files under the `data/` directory.
 
-These pre-built human and mouse domain-coordinate files were generated from Ensembl release version 110, so the human and mouse examples below use Ensembl release version 110 GTF and protein FASTA files to keep isoform IDs, protein IDs, genomic coordinates, and domain annotations consistent. Other Ensembl release versions or other species can also be used after generating a matching domain-coordinate file from the same annotation version.
+These pre-built human and mouse domain-coordinate files were generated from Ensembl release version 110, so the examples for human and mouse below use Ensembl release version 110 GTF and protein FASTA files to ensure consistent isoform IDs, protein IDs, genomic coordinates, and domain annotations. 
 
-### 2.1 Example usage using human isoforms
+### 2.1 Example usage for evaluating impact of isoforms in humans
 
 Step 1. Download the Ensembl release version 110 human GTF and protein FASTA files:
 
@@ -73,7 +73,7 @@ python IsoImpact.py \
 
 Because this example compares human isoforms, the command uses the human domain-coordinate file `data/human_domain.csv`.
 
-After the command finishes, IsoImpact writes the output figure to:
+After the command is finished, IsoImpact writes the output figure to the file below:
 
 ```text
 results/human_isoforms/IsoImpact_figure.png
@@ -83,13 +83,13 @@ results/human_isoforms/IsoImpact_figure.png
 
 ![IsoImpact output figure](data/example_output/IsoImpact_figure.png)
 
-IsoImpact also writes the feature matrix to:
+IsoImpact also writes the feature matrix of all queried isoforms into the file below:
 
 ```text
 results/human_isoforms/IsoImpact_features.csv
 ```
 
-`IsoImpact_features.csv` contains gene and isoform information, protein features, genomic span, and domain comparison results. A feature-matrix preview from four human MROH7 isoforms is shown below. The complete table is available as [`data/example_output/IsoImpact_features.csv`](data/example_output/IsoImpact_features.csv).
+`IsoImpact_features.csv` contains gene and isoform information, protein features, genomic span, and domain comparison results. To illustrate, part of the feature-matrix from four human MROH7 isoforms is shown below. The complete table is available as [`data/example_output/IsoImpact_features.csv`](data/example_output/IsoImpact_features.csv).
 
 | Gene ID | Canonical isoform | Alternative isoform | Alternative domains | Lost domains | Gained domains | Total domain change |
 | --- | --- | --- | --- | --- | --- | ---: |
@@ -97,8 +97,7 @@ results/human_isoforms/IsoImpact_features.csv
 | ENSG00000184313 | ENST00000421030 | ENST00000413188 | HEAT_Maestro_2 | HEAT_Maestro; HEAT_MROH2B_C | None | 2 |
 | ENSG00000184313 | ENST00000421030 | ENST00000409996 | HEAT_Maestro_2; HEAT_Maestro; HEAT_MROH2B_C | None | None | 0 |
 
-### 2.2 Example usage using mouse isoforms
-
+### 2.2  Example usage for evaluating impact of isoforms in mice
 Step 1. Download the Ensembl release version 110 mouse GTF and protein FASTA files:
 
 ```bash
@@ -114,7 +113,7 @@ gunzip references/Mus_musculus.GRCm39.110.gtf.gz
 gunzip references/Mus_musculus.GRCm39.pep.all.fa.gz
 ```
 
-Step 2. Run IsoImpact with mouse Ensembl isoform IDs:
+Step 2. Run IsoImpact with two mouse isoforms from the mouse gene Cdh7-202:
 
 ```bash
 python IsoImpact.py \
@@ -125,11 +124,11 @@ python IsoImpact.py \
   -o results/mouse_isoforms
 ```
 
-Replace the example IDs with the mouse isoforms to be compared. Because this example compares mouse isoforms, the command uses the mouse domain-coordinate file `data/mouse_domain.csv`.
+Because this example compares mouse isoforms, the command uses the mouse domain-coordinate file `data/mouse_domain.csv`.
 
-## 3. Generating Domain-Coordinate Files for Other Ensembl Versions or Species
+## 3. Generating genomic coordinates of domains for Other Ensembl Versions of humans/mice or for other Species
 
-For isoforms annotated in Ensembl release versions other than Ensembl release version 110, or for isoforms from another species, users can use the `build_custom_domain.R` script in the `scripts/` directory to generate a matching domain-coordinate file. The generated file should be used together with the GTF and protein FASTA files from the same annotation version. The example below uses two isoforms from the RERE gene in Ensembl release version 109 to demonstrate this process.
+For isoforms annotated in Ensembl release versions other than Ensembl release version 110, or for isoforms from other species, users can use the `build_custom_domain.R` script in the `scripts/` directory to generate a matching domain coordinate file. The generated file should be used together with the GTF and protein FASTA files from the same annotation version. The example below uses two isoforms from the RERE gene in Ensembl release version 109 to showcase this process.
 
 For this process, users need:
 
@@ -139,7 +138,7 @@ For this process, users need:
 3. PfamScan domain-prediction results for the corresponding protein sequences.
 ```
 
-Install the R packages used by `scripts/build_custom_domain.R`:
+First, install the R packages used by `scripts/build_custom_domain.R`:
 
 ```r
 install.packages("BiocManager")
@@ -147,9 +146,11 @@ BiocManager::install(c("AnnotationHub", "ensembldb", "GenomicRanges"))
 install.packages("dplyr")
 ```
 
+Second, follow the following four steps to create genomic coordinates of domains and run IsoImpact.
+
 Step 1. Prepare the GTF and protein FASTA files.
 
-First, download the Ensembl release version 109 human GTF file:
+Download the Ensembl release version 109 human GTF file:
 
 ```bash
 mkdir -p references
@@ -160,19 +161,19 @@ curl -L -o references/Homo_sapiens.GRCh38.109.gtf.gz \
 gunzip references/Homo_sapiens.GRCh38.109.gtf.gz
 ```
 
-Second, to reduce the running time of the example workflow, use the FASTA file provided in this repository, which contains a small subset of protein sequences:
+To reduce the running time of the example workflow, we use the protein FASTA file containing a small number of proteins in this repository:
 
 ```text
 data/example_release109/Homo_sapiens.GRCh38.pep.release109.example.fa
 ```
 
-If users want to run the process on the full proteome, they can also download the complete Ensembl release version 109 human protein FASTA file from Ensembl:
+If users want to use the full proteome, they can also download the complete Ensembl release version 109 human protein FASTA file from Ensembl:
 
 ```text
 https://ftp.ensembl.org/pub/release-109/fasta/homo_sapiens/pep/Homo_sapiens.GRCh38.pep.all.fa.gz
 ```
 
-Step 2. Generate PfamScan domain-prediction results.
+Step 2. Generate domain annotation using the pfam_scan.pl script.
 
 First, install PfamScan:
 
@@ -213,7 +214,7 @@ pfam_scan.pl \
   -outfile results/release109_rere/RERE_release109_pfam_results.txt
 ```
 
-Step 3. Generate an IsoImpact-compatible domain-coordinate file:
+Step 3. Generate an IsoImpact-compatible genomic coordinate file of domains:
 
 ```bash
 Rscript scripts/build_custom_domain.R \
@@ -234,13 +235,13 @@ python IsoImpact.py \
   -o results/release109_rere
 ```
 
-After the command finishes, IsoImpact writes the output figure to:
+After the command is finished, IsoImpact writes the output figure to:
 
 ```text
 results/release109_rere/IsoImpact_figure.png
 ```
 
-`IsoImpact_figure.png` contains the domain-mapping visualization and ranked feature-difference plot for the input isoforms. An output figure from the two Ensembl release version 109 RERE gene isoforms is available as [`data/example_release109/RERE_release109_IsoImpact_figure.png`](data/example_release109/RERE_release109_IsoImpact_figure.png).
+`IsoImpact_figure.png` contains the domain-mapping visualization and ranked feature-difference plot for the input isoforms. An output figure from two isoforms of the  RERE gene in Ensembl release 109 is available as [`data/example_release109/RERE_release109_IsoImpact_figure.png`](data/example_release109/RERE_release109_IsoImpact_figure.png).
 
 ![IsoImpact Ensembl release version 109 RERE gene output figure](data/example_release109/RERE_release109_IsoImpact_figure.png)
 
@@ -250,7 +251,7 @@ IsoImpact also writes the feature matrix to:
 results/release109_rere/IsoImpact_features.csv
 ```
 
-`IsoImpact_features.csv` contains gene and isoform information, protein features, genomic span, and domain comparison results. A feature-matrix preview from the two Ensembl release version 109 RERE gene isoforms is shown below. The complete table is available as [`data/example_release109/RERE_release109_IsoImpact_features.csv`](data/example_release109/RERE_release109_IsoImpact_features.csv).
+`IsoImpact_features.csv` contains gene and isoform information, protein features, genomic span, and domain comparison results. Part of the feature matrix of the two isoforms of RERE is shown below. The complete table is available as [`data/example_release109/RERE_release109_IsoImpact_features.csv`](data/example_release109/RERE_release109_IsoImpact_features.csv).
 
 | Gene ID | Canonical isoform | Alternative isoform | Alternative domains | Lost domains | Gained domains | Total domain change |
 | --- | --- | --- | --- | --- | --- | ---: |
@@ -258,7 +259,7 @@ results/release109_rere/IsoImpact_features.csv
 
 ## 4. Contact
 
-If you have questions about installing or running IsoImpact, or if you find an error in the code or documentation, please contact:
+If any questions about using IsoImpact, please contact:
 
 - Bin-Yu He: hzb022119@163.com
 - Hong-Dong Li: hongdong@csu.edu.cn
