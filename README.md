@@ -128,7 +128,7 @@ Because this example compares mouse isoforms, the command uses the mouse domain-
 
 ## 3. Generating genomic coordinates of domains for Other Ensembl Versions of humans/mice or for other Species
 
-For isoforms annotated in Ensembl release versions other than Ensembl release version 110, or for isoforms from other species, users can use the `build_custom_domain.R` script in the `scripts/` directory to generate a matching domain coordinate file. The generated file should be used together with the GTF and protein FASTA files from the same annotation version. The example below uses two isoforms from the RERE gene in Ensembl release version 109 to showcase this process.
+For isoforms annotated in Ensembl release versions other than Ensembl release version 110, or for isoforms from other species, users can use the `build_custom_domain.R` script in the `scripts/` directory to generate a matching domain coordinate file. The generated file should be used together with the GTF and protein FASTA files from the same annotation version. The example below uses two isoforms from the ***RERE*** gene in Ensembl release version 109 to showcase this process.
 
 For this process, users need:
 
@@ -224,7 +224,7 @@ Rscript scripts/build_custom_domain.R \
   --ensembl 109
 ```
 
-Step 4. Run IsoImpact with two human Ensembl isoform IDs from the **RERE** gene (**ENSG00000142599**) and the generated domain-coordinate file:
+Step 4. Run IsoImpact with two human Ensembl isoform IDs from the ***RERE*** gene (**ENSG00000142599**) and the generated domain-coordinate file:
 
 ```bash
 python IsoImpact.py \
@@ -241,9 +241,9 @@ After the command is finished, IsoImpact writes the output figure to:
 results/release109_rere/IsoImpact_figure.png
 ```
 
-`IsoImpact_figure.png` contains the domain-mapping visualization and ranked feature-difference plot for the input isoforms. An output figure from two isoforms of the  RERE gene in Ensembl release 109 is available as [`data/example_release109/RERE_release109_IsoImpact_figure.png`](data/example_release109/RERE_release109_IsoImpact_figure.png).
+`IsoImpact_figure.png` contains the domain-mapping visualization and ranked feature-difference plot for the input isoforms. An output figure from two isoforms of the  ***RERE*** gene in Ensembl release 109 is available as [`data/example_release109/RERE_release109_IsoImpact_figure.png`](data/example_release109/RERE_release109_IsoImpact_figure.png).
 
-![IsoImpact Ensembl release version 109 RERE gene output figure](data/example_release109/RERE_release109_IsoImpact_figure.png)
+![IsoImpact Ensembl release version 109 ***RERE*** gene output figure](data/example_release109/RERE_release109_IsoImpact_figure.png)
 
 IsoImpact also writes the feature matrix to:
 
@@ -251,7 +251,7 @@ IsoImpact also writes the feature matrix to:
 results/release109_rere/IsoImpact_features.csv
 ```
 
-`IsoImpact_features.csv` contains gene and isoform information, protein features, genomic span, and domain comparison results. Part of the feature matrix of the two isoforms of RERE is shown below. The complete table is available as [`data/example_release109/RERE_release109_IsoImpact_features.csv`](data/example_release109/RERE_release109_IsoImpact_features.csv).
+`IsoImpact_features.csv` contains gene and isoform information, protein features, genomic span, and domain comparison results. Part of the feature matrix of the two isoforms of ***RERE*** is shown below. The complete table is available as [`data/example_release109/RERE_release109_IsoImpact_features.csv`](data/example_release109/RERE_release109_IsoImpact_features.csv).
 
 | Gene ID | Canonical isoform | Alternative isoform | Alternative domains | Lost domains | Gained domains | Total domain change |
 | --- | --- | --- | --- | --- | --- | ---: |
