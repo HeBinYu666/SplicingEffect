@@ -127,7 +127,7 @@ python IsoImpact.py \
 
 Replace the example IDs with the mouse isoforms to be compared. Because this example compares mouse isoforms, the command uses the mouse domain-coordinate file `data/mouse_domain.csv`.
 
-## 3. Generating Domain-Coordinate Files
+## 3. Generating Domain-Coordinate Files for Other Ensembl Versions or Species
 
 For isoforms annotated in Ensembl release versions other than Ensembl release version 110, or for isoforms from another species, users can use the `build_custom_domain.R` script in the `scripts/` directory to generate a matching domain-coordinate file. The generated file should be used together with the GTF and protein FASTA files from the same annotation version. The example below uses two isoforms from the RERE gene in Ensembl release version 109 to demonstrate this process.
 
