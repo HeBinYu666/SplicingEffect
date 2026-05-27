@@ -60,7 +60,7 @@ gunzip references/Homo_sapiens.GRCh38.110.gtf.gz
 gunzip references/Homo_sapiens.GRCh38.pep.all.fa.gz
 ```
 
-Step 2. Run IsoImpact with four human Ensembl isoform IDs from the **MROH7 gene** (**ENSG00000184313**):
+Step 2. Run IsoImpact with four human Ensembl isoform IDs from the ***MROH7*** gene (**ENSG00000184313**):
 
 ```bash
 python IsoImpact.py \
@@ -79,7 +79,7 @@ After the command is finished, IsoImpact writes the output figure to the file be
 results/human_isoforms/IsoImpact_figure.png
 ```
 
-`IsoImpact_figure.png` contains the domain-mapping visualization and ranked feature-difference plot for the input isoforms. An output figure from the four human MROH7 isoforms is available as [`data/example_output/IsoImpact_figure.png`](data/example_output/IsoImpact_figure.png).
+`IsoImpact_figure.png` contains the domain-mapping visualization and ranked feature-difference plot for the input isoforms. An output figure from the four human ***MROH7*** isoforms is available as [`data/example_output/IsoImpact_figure.png`](data/example_output/IsoImpact_figure.png).
 
 ![IsoImpact output figure](data/example_output/IsoImpact_figure.png)
 
@@ -89,7 +89,7 @@ IsoImpact also writes the feature matrix of all queried isoforms into the file b
 results/human_isoforms/IsoImpact_features.csv
 ```
 
-`IsoImpact_features.csv` contains gene and isoform information, protein features, genomic span, and domain comparison results. To illustrate, part of the feature-matrix from four human MROH7 isoforms is shown below. The complete table is available as [`data/example_output/IsoImpact_features.csv`](data/example_output/IsoImpact_features.csv).
+`IsoImpact_features.csv` contains gene and isoform information, protein features, genomic span, and domain comparison results. To illustrate, part of the feature-matrix from four human ***MROH7*** isoforms is shown below. The complete table is available as [`data/example_output/IsoImpact_features.csv`](data/example_output/IsoImpact_features.csv).
 
 | Gene ID | Canonical isoform | Alternative isoform | Alternative domains | Lost domains | Gained domains | Total domain change |
 | --- | --- | --- | --- | --- | --- | ---: |
@@ -113,7 +113,7 @@ gunzip references/Mus_musculus.GRCm39.110.gtf.gz
 gunzip references/Mus_musculus.GRCm39.pep.all.fa.gz
 ```
 
-Step 2. Run IsoImpact with two mouse isoforms from the mouse gene Cdh7-202:
+Step 2. Run IsoImpact with two mouse isoforms from the mouse ***Cdh7*** gene (**ENSMUSG00000026312**):
 
 ```bash
 python IsoImpact.py \
