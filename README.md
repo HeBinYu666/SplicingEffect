@@ -224,7 +224,7 @@ Rscript scripts/build_custom_domain.R \
   --ensembl 109
 ```
 
-Step 4. Run IsoImpact with two human Ensembl isoform IDs from the **RERE gene** (**ENSG00000142599**) and the generated domain-coordinate file:
+Step 4. Run IsoImpact with two human Ensembl isoform IDs from the **RERE** gene (**ENSG00000142599**) and the generated domain-coordinate file:
 
 ```bash
 python IsoImpact.py \
