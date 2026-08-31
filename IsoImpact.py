@@ -6,9 +6,6 @@ import gzip
 # =====================================================================
 # 1. Command-line interface
 # =====================================================================
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-DEFAULT_HUMAN_DOMAIN_CSV = os.path.join(BASE_DIR, "data", "human_domain.csv")
-DEFAULT_MOUSE_DOMAIN_CSV = os.path.join(BASE_DIR, "data", "mouse_domain.csv")
 REQUIRED_DOMAIN_COLUMNS = [
     "Protein_ID",
     "Domain_ID",
@@ -29,27 +26,28 @@ parser = argparse.ArgumentParser(
 
 group = parser.add_mutually_exclusive_group(required=True)
 group.add_argument(
-    "-i", "--isoform", nargs="+",
+    "-i", dest="isoform", nargs="+",
     help="Compare at least two isoform IDs, for example: -i ENST1 ENST2"
 )
 group.add_argument(
-    "-q", "--query-exon", nargs=3, metavar=("ISOFORM_ID", "START", "END"),
-    help="Query domains overlapping one exon, for example: -q ENST1 1000 2000"
+    "-r", dest="reference_pair", nargs=2,
+    metavar=("REFERENCE_ISOFORM", "COMPARED_ISOFORM"),
+    help="Compare two isoforms in the given order as COMPARED - REFERENCE"
 )
 
-parser.add_argument("-g", "--gtf", help="Path to the matching GTF annotation file")
-parser.add_argument("-f", "--fasta", help="Path to the matching protein FASTA file")
+parser.add_argument("-g", dest="gtf", required=True, help="Path to the matching GTF annotation file")
+parser.add_argument("-f", dest="fasta", required=True, help="Path to the matching protein FASTA file")
 parser.add_argument(
-    "-d", "--domain", required=True,
+    "-d", dest="domain", required=True,
     help="Path to the matching domain-coordinate CSV file"
 )
 parser.add_argument(
-    "-o", "--outdir", default=".",
-    help="Directory for output files in isoform comparison mode"
+    "-o", dest="outdir", default=".",
+    help="Directory for output files"
 )
 parser.add_argument(
-    "--prefix", default="IsoImpact",
-    help="Prefix for output files in isoform comparison mode"
+    "-z", dest="difference_view", action="store_true",
+    help="Also write a difference-focused transcript-structure figure"
 )
 
 args = parser.parse_args()
@@ -57,7 +55,6 @@ args = parser.parse_args()
 GTF_FILE = args.gtf
 FASTA_FILE = args.fasta
 OUT_DIR = args.outdir
-OUT_PREFIX = args.prefix
 
 try:
     import pandas as pd
@@ -80,16 +77,10 @@ except ImportError as exc:
 DOMAIN_CSV = args.domain
 print(f"[IsoImpact] Using domain-coordinate file: {DOMAIN_CSV}")
 
-if not GTF_FILE:
-    parser.error("A matching GTF annotation file is required with -g/--gtf.")
-
-if args.isoform and not FASTA_FILE:
-    parser.error("Isoform comparison mode requires a matching protein FASTA file with -f/--fasta.")
-
 if not os.path.exists(GTF_FILE):
     parser.error(f"GTF file not found: {GTF_FILE}")
 
-if args.isoform and not os.path.exists(FASTA_FILE):
+if not os.path.exists(FASTA_FILE):
     parser.error(f"FASTA file not found: {FASTA_FILE}")
 
 if not os.path.exists(DOMAIN_CSV):
@@ -106,72 +97,18 @@ if missing_domain_cols:
 df_domains["Protein_ID"] = df_domains["Protein_ID"].astype(str)
 
 # =====================================================================
-# 3. Exon-domain query mode (-q)
-# =====================================================================
-if args.query_exon:
-    target_enst = args.query_exon[0]
-    try:
-        exon_start = int(args.query_exon[1])
-        exon_end = int(args.query_exon[2])
-    except ValueError:
-        print("Error: exon start and end coordinates must be integers.")
-        exit(1)
-        
-    print(f"[IsoImpact] Querying domains overlapping {target_enst}:{exon_start}-{exon_end}...")
-    
-    prot_id = None
-    if os.path.exists(GTF_FILE):
-        with open_text(GTF_FILE) as f:
-            for line in f:
-                if line.startswith('#'): continue
-                if target_enst in line:
-                    match_prot = re.search(r'protein_id "([^"]+)"', line)
-                    if match_prot:
-                        prot_id = match_prot.group(1)
-                        break
-    
-    if not prot_id:
-        print(f"No protein_id was found for {target_enst} in the GTF file.")
-        exit(0)
-
-    target_doms = df_domains[df_domains['Protein_ID'].str.contains(prot_id, na=False, regex=False)]
-    
-    if target_doms.empty:
-        print(f"No annotated domain was found for protein {prot_id}.")
-        exit(0)
-        
-    overlapping_domains = []
-    for _, row in target_doms.iterrows():
-        overlap_start = max(exon_start, row['Genomic_Start'])
-        overlap_end = min(exon_end, row['Genomic_End'])
-        
-        if overlap_start <= overlap_end:
-            overlap_length = overlap_end - overlap_start + 1
-            dom_name = row.get('Domain_Name', 'Unknown')
-            dom_id = row.get('Domain_ID', '')
-            if pd.notna(dom_id) and str(dom_id).strip():
-                display_name = f"{dom_name} ({dom_id})"
-            else:
-                display_name = dom_name
-                
-            overlapping_domains.append(f"{display_name} [overlap: {overlap_length} bp]")
-            
-    if overlapping_domains:
-        print("Overlapping domain(s): " + " | ".join(overlapping_domains))
-    else:
-        print("No domain overlaps this exon interval.")
-        
-    # Query mode ends here; FASTA is not required.
-    exit(0)
-
-# =====================================================================
-# 4. Isoform comparison and visualization mode (-i)
+# 3. Isoform comparison mode
 # =====================================================================
 if args.isoform:
     INPUT_TXS = args.isoform
+    COMPARISON_MODE = "canonical"
     if len(INPUT_TXS) < 2:
-        print("Error: isoform comparison mode requires at least two isoform IDs.")
-        exit(1)
+        parser.error("-i requires at least two isoform IDs.")
+else:
+    INPUT_TXS = args.reference_pair
+    COMPARISON_MODE = "reference_pair"
+    if INPUT_TXS[0] == INPUT_TXS[1]:
+        parser.error("-r requires two different isoform IDs.")
 
 os.makedirs(OUT_DIR, exist_ok=True)
 
@@ -261,6 +198,18 @@ def get_all_features(seq):
     feats.update(get_high_dim_propy3_features(seq))
     return feats
 
+
+def signed_normalized_difference(compared_value, reference_value):
+    try:
+        compared_value = float(compared_value)
+        reference_value = float(reference_value)
+    except (TypeError, ValueError):
+        return 0
+    denominator = abs(compared_value) + abs(reference_value)
+    if denominator == 0:
+        return 0
+    return round((compared_value - reference_value) / denominator, 4)
+
 # =====================================================================
 # 5. Parse the GTF annotation
 # =====================================================================
@@ -309,10 +258,25 @@ if missing_proteins:
         + ", ".join(missing_proteins)
     )
 
-can_tx = next((tx for tx in INPUT_TXS if tx_info[tx]['is_canonical']), None)
-if not can_tx:
-    can_tx = max(INPUT_TXS, key=lambda x: tx_info[x]['span_end'] - tx_info[x]['span_start'])
-alt_txs = [tx for tx in INPUT_TXS if tx != can_tx]
+if COMPARISON_MODE == "reference_pair":
+    gene_ids = [tx_info[tx]['gene_id'] for tx in INPUT_TXS]
+    if any(not gene_id for gene_id in gene_ids) or len(set(gene_ids)) != 1:
+        parser.error("-r requires two isoforms from the same gene.")
+    can_tx = INPUT_TXS[0]
+    alt_txs = [INPUT_TXS[1]]
+    reference_label = "Reference"
+    compared_label = "Compared"
+    reference_feature_prefix = "Reference"
+    compared_feature_prefix = "Compared"
+else:
+    can_tx = next((tx for tx in INPUT_TXS if tx_info[tx]['is_canonical']), None)
+    if not can_tx:
+        can_tx = max(INPUT_TXS, key=lambda x: tx_info[x]['span_end'] - tx_info[x]['span_start'])
+    alt_txs = [tx for tx in INPUT_TXS if tx != can_tx]
+    reference_label = "Canonical"
+    compared_label = "Alternative"
+    reference_feature_prefix = "Can"
+    compared_feature_prefix = "Alt"
 
 # =====================================================================
 # 6. Extract protein FASTA sequences and build the feature matrix
@@ -346,31 +310,34 @@ for alt_tx in alt_txs:
     feat_a = get_all_features(sequences.get(alt_prot_id, ""))
     
     d_a_list = df_domains[df_domains['Protein_ID'].str.contains(alt_prot_id, na=False, regex=False)]['Domain_Name'].tolist() if alt_prot_id and not df_domains.empty else []
-    d_shared, d_lost, d_gained = list(set(d_c_list) & set(d_a_list)), list(set(d_c_list) - set(d_a_list)), list(set(d_a_list) - set(d_c_list))
+    d_shared = sorted(set(d_c_list) & set(d_a_list))
+    d_lost = sorted(set(d_c_list) - set(d_a_list))
+    d_gained = sorted(set(d_a_list) - set(d_c_list))
     sp_a = tx_info[alt_tx]['span_end'] - tx_info[alt_tx]['span_start'] + 1
     
     row = {
         "Gene_ID": tx_info[can_tx]['gene_id'],
-        "Canonical_Transcript_ID": can_tx,
-        "Alternative_Transcript_ID": alt_tx,
-        "Canonical_Protein_ID": can_prot_id,
-        "Alternative_Protein_ID": alt_prot_id,
-        "Coding_Potential_Canonical": tx_info[can_tx]['biotype'],
-        "Coding_Potential_Alternative": tx_info[alt_tx]['biotype'],
-        "Protein_Length_Canonical": len(sequences.get(can_prot_id, "")),
-        "Protein_Length_Alternative": len(sequences.get(alt_prot_id, "")),
+        f"{reference_label}_Transcript_ID": can_tx,
+        f"{compared_label}_Transcript_ID": alt_tx,
+        f"{reference_label}_Protein_ID": can_prot_id,
+        f"{compared_label}_Protein_ID": alt_prot_id,
+        f"Coding_Potential_{reference_label}": tx_info[can_tx]['biotype'],
+        f"Coding_Potential_{compared_label}": tx_info[alt_tx]['biotype'],
+        f"Protein_Length_{reference_label}": len(sequences.get(can_prot_id, "")),
+        f"Protein_Length_{compared_label}": len(sequences.get(alt_prot_id, "")),
         "Protein_Length_Difference": len(sequences.get(alt_prot_id, "")) - len(sequences.get(can_prot_id, "")),
-        "Molecular_Weight_Canonical_Da": feat_c.get("MW", 0),
-        "Molecular_Weight_Alternative_Da": feat_a.get("MW", 0),
+        f"Molecular_Weight_{reference_label}_Da": feat_c.get("MW", 0),
+        f"Molecular_Weight_{compared_label}_Da": feat_a.get("MW", 0),
         "Molecular_Weight_Difference_Da": round(feat_a.get("MW", 0) - feat_c.get("MW", 0), 2),
-        "Exon_Count_Canonical": len(tx_info[can_tx]['exons']),
-        "Exon_Count_Alternative": len(tx_info[alt_tx]['exons']),
+        "Normalized_Delta_MW": signed_normalized_difference(feat_a.get("MW", 0), feat_c.get("MW", 0)),
+        f"Exon_Count_{reference_label}": len(tx_info[can_tx]['exons']),
+        f"Exon_Count_{compared_label}": len(tx_info[alt_tx]['exons']),
         "Exon_Count_Difference": len(tx_info[alt_tx]['exons']) - len(tx_info[can_tx]['exons']),
-        "Genomic_Span_Canonical_bp": sp_c if sp_c != float('inf') else 0,
-        "Genomic_Span_Alternative_bp": sp_a if sp_a != float('inf') else 0,
+        f"Genomic_Span_{reference_label}_bp": sp_c if sp_c != float('inf') else 0,
+        f"Genomic_Span_{compared_label}_bp": sp_a if sp_a != float('inf') else 0,
         "Genomic_Span_Difference_bp": (sp_a - sp_c) if sp_c != float('inf') else 0,
-        "Domains_List_Canonical": ";".join(d_c_list) if d_c_list else "None",
-        "Domains_List_Alternative": ";".join(d_a_list) if d_a_list else "None",
+        f"Domains_List_{reference_label}": ";".join(d_c_list) if d_c_list else "None",
+        f"Domains_List_{compared_label}": ";".join(d_a_list) if d_a_list else "None",
         "Domains_List_Shared": ";".join(d_shared) if d_shared else "None",
         "Domains_List_Lost": ";".join(d_lost) if d_lost else "None",
         "Domains_List_Gained": ";".join(d_gained) if d_gained else "None",
@@ -382,12 +349,14 @@ for alt_tx in alt_txs:
     feat_c_copy = feat_c.copy()
     feat_c_copy.pop("MW", None); feat_a.pop("MW", None)
     for k in feat_c_copy.keys():
-        row[f"Can_{k}"] = feat_c_copy[k]
-        row[f"Alt_{k}"] = feat_a.get(k, 0)
+        row[f"{reference_feature_prefix}_{k}"] = feat_c_copy[k]
+        row[f"{compared_feature_prefix}_{k}"] = feat_a.get(k, 0)
         try:
             row[f"Delta_{k}"] = round(feat_a.get(k, 0) - feat_c_copy[k], 4)
+            row[f"Normalized_Delta_{k}"] = signed_normalized_difference(feat_a.get(k, 0), feat_c_copy[k])
         except:
             row[f"Delta_{k}"] = 0
+            row[f"Normalized_Delta_{k}"] = 0
             
     rows.append(row)
 
@@ -396,13 +365,13 @@ if df_all_features.empty:
     print("Error: no isoform comparison rows were generated. Please check isoform IDs, GTF, FASTA, and domain files.")
     exit(1)
 
-delta_cols = [c for c in df_all_features.columns if c.startswith('Delta_')]
-if not delta_cols:
+normalized_delta_cols = [c for c in df_all_features.columns if c.startswith('Normalized_Delta_')]
+if not normalized_delta_cols:
     parser.error(
-        "No protein feature delta columns were generated. Please check the protein FASTA sequences."
+        "No normalized protein feature delta columns were generated. Please check the protein FASTA sequences."
     )
 
-csv_filename = os.path.join(OUT_DIR, f"{OUT_PREFIX}_features.csv")
+csv_filename = os.path.join(OUT_DIR, "IsoImpact_features.csv")
 df_all_features.to_csv(csv_filename, index=False)
 print(f"[IsoImpact] Feature matrix written to {csv_filename} ({len(rows[0])} columns).")
 
@@ -507,7 +476,7 @@ for tx in all_txs_to_plot:
 text_align_x = global_min_x - 400 if global_min_x != float('inf') else -400
 
 y_positions = np.arange(len(all_txs_to_plot), 0, -1) * 2.0 
-track_labels = [f"Canonical:\n{can_tx}"] + [f"Alternative:\n{tx}" for tx in alt_txs]
+track_labels = [f"{reference_label}:\n{can_tx}"] + [f"{compared_label}:\n{tx}" for tx in alt_txs]
 
 for tx, y, label in zip(all_txs_to_plot, y_positions, track_labels):
     exons = exons_dict[tx]
@@ -564,10 +533,9 @@ ax_new = fig.add_subplot(gs[1, :])
 ax_new.set_title('B', loc='left', fontsize=22, fontweight='bold', pad=10)
 
 if not df_all_features.empty:
-    mean_delta = df_all_features[delta_cols].mean(axis=0)
-    sorted_delta_cols = mean_delta.sort_values(ascending=False).index.tolist()
-    sorted_feat_names = [c.replace('Delta_', '') for c in sorted_delta_cols]
-    n_feats = len(sorted_feat_names)
+    mean_absolute_delta = df_all_features[normalized_delta_cols].abs().mean(axis=0)
+    sorted_delta_cols = mean_absolute_delta.sort_values(ascending=False).index.tolist()
+    sorted_feat_names = [c.replace('Normalized_Delta_', '') for c in sorted_delta_cols]
 
     isoform_styles = [
         {'color': '#0072B2'},
@@ -578,33 +546,19 @@ if not df_all_features.empty:
         {'color': '#F0E442'},
         {'color': '#D55E00'},
     ]
-    all_y_vals = []
     isoform_plot_data = []
     for i, (_, row) in enumerate(df_all_features.iterrows()):
-        alt_id = row['Alternative_Transcript_ID']
-        y_vals = [float(row[f'Delta_{feat}']) if f'Delta_{feat}' in row.index else 0.0
-                  for feat in sorted_feat_names]
+        alt_id = row[f'{compared_label}_Transcript_ID']
+        y_vals = [float(row[column]) for column in sorted_delta_cols]
         isoform_plot_data.append((alt_id, y_vals, isoform_styles[i % len(isoform_styles)]))
-        all_y_vals.extend(y_vals)
 
-    y_arr = np.array(all_y_vals)
-    y_lo = np.percentile(y_arr, 1)
-    y_hi = np.percentile(y_arr, 99)
-    y_margin = (y_hi - y_lo) * 0.15
-    if y_margin == 0:
-        y_margin = max(abs(y_hi) * 0.15, 1.0)
-    ax_new.set_ylim(y_lo - y_margin, y_hi + y_margin)
-
-    n_iso = len(isoform_plot_data)
-    offsets = np.linspace(-0.3, 0.3, n_iso) if n_iso > 1 else [0]
+    ax_new.set_ylim(-1.05, 1.05)
 
     for idx, (alt_id, y_vals, style) in enumerate(isoform_plot_data):
-        # Each alternative isoform is ranked independently, as described in the paper.
-        y_sorted = sorted(y_vals, reverse=True)
-        x_indices = list(range(len(y_sorted)))
+        x_indices = list(range(len(y_vals)))
         
         ax_new.vlines(
-            x_indices, 0, y_sorted,
+            x_indices, 0, y_vals,
             color=style['color'],
             alpha=0.55,
             linewidth=0.6,
@@ -614,57 +568,53 @@ if not df_all_features.empty:
 
     ax_new.axhline(0, color='black', linewidth=1.5, zorder=2)
     ax_new.set_xlabel(
-        f'Feature Rank',
+        'Feature Rank (ordered by mean absolute normalized difference)',
         fontsize=20, fontweight='bold'
     )
-    ax_new.set_ylabel('Difference  (Alt - Canonical)', fontsize=20, fontweight='bold')
+    difference_axis_label = 'Signed normalized difference'
+    if COMPARISON_MODE == 'reference_pair':
+        difference_axis_label += '\n(Compared - Reference)'
+    else:
+        difference_axis_label += '\n(Alternative - Canonical)'
+    ax_new.set_ylabel(difference_axis_label, fontsize=20, fontweight='bold')
     ax_new.tick_params(axis='both', labelsize=18)
     plt.setp(ax_new.get_xticklabels(), fontweight='bold')
     plt.setp(ax_new.get_yticklabels(), fontweight='bold')
     ax_new.spines['top'].set_visible(False)
     ax_new.spines['right'].set_visible(False)
-    # Label one positive and one negative extreme for each alternative isoform.
     y_vis_hi = ax_new.get_ylim()[1]
     y_vis_lo = ax_new.get_ylim()[0]
 
-    def truncate_name(name, max_len=22):
-        return name if len(name) <= max_len else name[:max_len] + '...'
-
     for iso_idx, (alt_id, y_vals, style) in enumerate(isoform_plot_data):
-        paired_iso = sorted(zip(sorted_delta_cols, y_vals), key=lambda x: x[1], reverse=True)
-        feat_names_iso = [c.replace('Delta_', '') for c, _ in paired_iso]
-        y_iso = [v for _, v in paired_iso]
-
-        for rank in range(len(y_iso)):
-            val = y_iso[rank]
-            if val <= 0:
-                break
+        positive_indices = [index for index, value in enumerate(y_vals) if value > 0]
+        if positive_indices:
+            feature_index = max(positive_indices, key=lambda index: y_vals[index])
+            value = y_vals[feature_index]
             ax_new.annotate(
-                feat_names_iso[rank],
-                xy=(rank, min(val, y_vis_hi * 0.98)),
-                xytext=(rank + 40, y_vis_hi * (0.92 - iso_idx * 0.18)),
+                sorted_feat_names[feature_index],
+                xy=(feature_index, min(value, y_vis_hi * 0.98)),
+                xytext=(15, -15 - iso_idx * 18),
+                textcoords='offset points',
                 fontsize=11, fontweight='bold', color=style['color'],
                 ha='left', va='center',
                 arrowprops=dict(arrowstyle='->', color=style['color'], lw=0.9),
                 clip_on=False
             )
-            break
 
-        for rank in range(len(y_iso)):
-            real_x = len(y_iso) - 1 - rank
-            val = y_iso[real_x]
-            if val >= 0:
-                break
+        negative_indices = [index for index, value in enumerate(y_vals) if value < 0]
+        if negative_indices:
+            feature_index = min(negative_indices, key=lambda index: y_vals[index])
+            value = y_vals[feature_index]
             ax_new.annotate(
-                feat_names_iso[real_x],
-                xy=(real_x, max(val, y_vis_lo * 0.98)),
-                xytext=(real_x - 200, y_vis_lo * (0.92 - iso_idx * 0.18)),
+                sorted_feat_names[feature_index],
+                xy=(feature_index, max(value, y_vis_lo * 0.98)),
+                xytext=(15, 15 + iso_idx * 18),
+                textcoords='offset points',
                 fontsize=11, fontweight='bold', color=style['color'],
                 ha='left', va='center',
                 arrowprops=dict(arrowstyle='->', color=style['color'], lw=0.9),
                 clip_on=False
             )
-            break
     legend_elements_new = [
         patches.Patch(facecolor=style['color'], edgecolor='dimgray', label=alt_id)
         for alt_id, _, style in isoform_plot_data
@@ -673,11 +623,260 @@ if not df_all_features.empty:
         handles=legend_elements_new,
         loc='center left', bbox_to_anchor=(1.01, 0.5), frameon=False,
         prop={'size': 18, 'weight': 'bold'},
-        title='Alternative Isoforms',
+        title='Alternative Isoforms' if COMPARISON_MODE == 'canonical' else 'Compared Isoform',
         title_fontproperties={'size': 20, 'weight': 'bold'}
     )
-output_filename = os.path.join(OUT_DIR, f"{OUT_PREFIX}_figure.png")
-plt.savefig(output_filename, dpi=300, bbox_inches='tight', facecolor='white')
+output_filename = os.path.join(OUT_DIR, "IsoImpact_figure.png")
+fig.savefig(output_filename, dpi=300, bbox_inches='tight', facecolor='white')
+
+if args.difference_view:
+    def interval_overlaps(items, start, end):
+        return any(item['start'] < end and item['end'] > start for item in items)
+
+    difference_segments = []
+    for segment_start, segment_end in zip(boundaries[:-1], boundaries[1:]):
+        reference_has_cds = interval_overlaps(cds_dict[can_tx], segment_start, segment_end)
+        compared_cds_states = [
+            interval_overlaps(cds_dict[tx], segment_start, segment_end)
+            for tx in alt_txs
+        ]
+        if any(state != reference_has_cds for state in compared_cds_states):
+            difference_segments.append((map_pos(segment_start), map_pos(segment_end)))
+
+    if not difference_segments:
+        for segment_start, segment_end in zip(boundaries[:-1], boundaries[1:]):
+            reference_has_exon = interval_overlaps(exons_dict[can_tx], segment_start, segment_end)
+            compared_exon_states = [
+                interval_overlaps(exons_dict[tx], segment_start, segment_end)
+                for tx in alt_txs
+            ]
+            if any(state != reference_has_exon for state in compared_exon_states):
+                difference_segments.append((map_pos(segment_start), map_pos(segment_end)))
+
+    full_visible_start = map_pos(boundaries[0])
+    full_visible_end = map_pos(boundaries[-1])
+    merged_difference_groups = []
+    for segment_start, segment_end in difference_segments:
+        if not merged_difference_groups or segment_start - merged_difference_groups[-1][1] > MAX_INTRON_LEN * 1.25:
+            merged_difference_groups.append([segment_start, segment_end, segment_end - segment_start])
+        else:
+            merged_difference_groups[-1][1] = segment_end
+            merged_difference_groups[-1][2] += segment_end - segment_start
+
+    if merged_difference_groups:
+        focus_group = max(
+            merged_difference_groups,
+            key=lambda group: (group[2], group[1] - group[0])
+        )
+        focus_start, focus_end = focus_group[0], focus_group[1]
+    else:
+        focus_start, focus_end = full_visible_start, full_visible_end
+
+    focus_width = max(focus_end - focus_start, 1)
+    full_visible_width = max(full_visible_end - full_visible_start, 1)
+    focus_padding = max(focus_width * 0.15, min(500, full_visible_width * 0.05))
+    view_start = max(full_visible_start, focus_start - focus_padding)
+    view_end = min(full_visible_end, focus_end + focus_padding)
+    if view_end <= view_start:
+        view_start, view_end = full_visible_start, full_visible_end
+
+    overview_height = max(3.5, 1.2 + len(all_txs_to_plot) * 1.0)
+    difference_height = max(4.5, 1.5 + len(all_txs_to_plot) * 1.25)
+    combined_height = overview_height + difference_height + 1.5
+    difference_figure = plt.figure(
+        figsize=(20, combined_height), dpi=300, constrained_layout=False
+    )
+    combined_grid = GridSpec(
+        2, 1, figure=difference_figure,
+        height_ratios=[overview_height, difference_height], hspace=0.48
+    )
+    overview_axis = difference_figure.add_subplot(combined_grid[0, 0])
+    difference_axis = difference_figure.add_subplot(combined_grid[1, 0])
+    difference_figure.subplots_adjust(left=0.18, right=0.98, top=0.93, bottom=0.12)
+
+    def draw_transcript_tracks(target_axis, x_start, x_end, label_fontsize, highlighted_segments=None):
+        if highlighted_segments:
+            for segment_start, segment_end in highlighted_segments:
+                highlighted_start = max(segment_start, x_start)
+                highlighted_end = min(segment_end, x_end)
+                if highlighted_end > highlighted_start:
+                    target_axis.axvspan(
+                        highlighted_start, highlighted_end,
+                        color='#F4A3A3', alpha=0.22, zorder=0
+                    )
+
+        target_y_positions = np.arange(len(all_txs_to_plot), 0, -1) * 2.0
+        label_x = x_start - max((x_end - x_start) * 0.025, 20)
+        for tx, y, label in zip(all_txs_to_plot, target_y_positions, track_labels):
+            exons = exons_dict[tx]
+            cds_list = cds_dict[tx]
+            gene_start = max(map_pos(exons[0]['start']), x_start)
+            gene_end = min(map_pos(exons[-1]['end']), x_end)
+            if gene_end > gene_start:
+                target_axis.plot(
+                    [gene_start, gene_end], [y, y],
+                    color='dimgray', linewidth=1.5, zorder=1
+                )
+            target_axis.text(
+                label_x, y, label, ha='right', va='center',
+                fontweight='bold', color='#222222',
+                fontsize=label_fontsize, clip_on=False
+            )
+
+            for exon in exons:
+                exon_start, exon_end = map_pos(exon['start']), map_pos(exon['end'])
+                clipped_start = max(exon_start, x_start)
+                clipped_end = min(exon_end, x_end)
+                if clipped_end > clipped_start:
+                    target_axis.add_patch(
+                        patches.Rectangle(
+                            (clipped_start, y - H_utr / 2),
+                            clipped_end - clipped_start, H_utr,
+                            linewidth=0.8, edgecolor='gray',
+                            facecolor='#e0e0e0', zorder=3
+                        )
+                    )
+
+            for cds in cds_list:
+                cds_start, cds_end = map_pos(cds['start']), map_pos(cds['end'])
+                clipped_start = max(cds_start, x_start)
+                clipped_end = min(cds_end, x_end)
+                if clipped_end > clipped_start:
+                    target_axis.add_patch(
+                        patches.Rectangle(
+                            (clipped_start, y - H_cds / 2),
+                            clipped_end - clipped_start, H_cds,
+                            linewidth=0.8, edgecolor='#2C5F8A',
+                            facecolor='#5B8DB8', zorder=4
+                        )
+                    )
+
+            if not df_domains.empty and tx_info[tx]['protein_id']:
+                tx_domains = df_domains[
+                    df_domains['Protein_ID'].str.contains(
+                        tx_info[tx]['protein_id'], na=False, regex=False
+                    )
+                ]
+                for _, row_domain in tx_domains.iterrows():
+                    domain_start = row_domain['Genomic_Start']
+                    domain_end = row_domain['Genomic_End']
+                    domain_color = dynamic_domain_colors.get(row_domain['Domain_Name'], 'orange')
+                    for cds in cds_list:
+                        overlap_start = max(cds['start'], domain_start)
+                        overlap_end = min(cds['end'], domain_end)
+                        if overlap_start >= overlap_end:
+                            continue
+                        visible_start = max(map_pos(overlap_start), x_start)
+                        visible_end = min(map_pos(overlap_end), x_end)
+                        if visible_end > visible_start:
+                            target_axis.add_patch(
+                                patches.Rectangle(
+                                    (visible_start, y - H_domain / 2),
+                                    visible_end - visible_start, H_domain,
+                                    linewidth=0.35, edgecolor='#333333',
+                                    facecolor=domain_color, alpha=0.9, zorder=5
+                                )
+                            )
+
+        target_axis.set_xlim(x_start, x_end)
+        target_axis.set_ylim(0.5, len(all_txs_to_plot) * 2.0 + 1.0)
+        target_axis.axis('off')
+
+    overview_axis.set_title(
+        'A  Full transcript overview and zoom location',
+        loc='left', fontsize=16, fontweight='bold', pad=8
+    )
+    draw_transcript_tracks(
+        overview_axis, full_visible_start, full_visible_end, label_fontsize=10
+    )
+    overview_y_bottom = 0.62
+    overview_y_top = len(all_txs_to_plot) * 2.0 + 0.88
+    overview_axis.add_patch(
+        patches.Rectangle(
+            (view_start, overview_y_bottom),
+            view_end - view_start, overview_y_top - overview_y_bottom,
+            linewidth=2.2, edgecolor='#D62728', facecolor='none',
+            linestyle='--', zorder=8
+        )
+    )
+    overview_axis.text(
+        (view_start + view_end) / 2, overview_y_top,
+        'Zoomed region', color='#D62728', fontsize=10,
+        fontweight='bold', ha='center', va='bottom'
+    )
+
+    difference_axis.set_title(
+        'B  Difference-focused transcript structure',
+        loc='left', fontsize=16, fontweight='bold', pad=8
+    )
+    draw_transcript_tracks(
+        difference_axis, view_start, view_end, label_fontsize=12,
+        highlighted_segments=difference_segments
+    )
+
+    difference_y_top = len(all_txs_to_plot) * 2.0 + 0.88
+    for connector_x in (view_start, view_end):
+        connector = patches.ConnectionPatch(
+            xyA=(connector_x, overview_y_bottom),
+            xyB=(connector_x, difference_y_top),
+            coordsA=overview_axis.transData,
+            coordsB=difference_axis.transData,
+            color='#D62728', linewidth=1.2, linestyle='--',
+            alpha=0.75, zorder=7, clip_on=False
+        )
+        difference_figure.add_artist(connector)
+
+    overview_legend = [
+        patches.Patch(facecolor='#e0e0e0', edgecolor='#999999', label='UTR'),
+        patches.Patch(facecolor='#5B8DB8', edgecolor='#2C5F8A', label='CDS'),
+        patches.Patch(facecolor='none', edgecolor='#D62728', linestyle='--', label='Zoomed region')
+    ]
+    for domain_name, domain_color in dynamic_domain_colors.items():
+        overview_legend.append(
+            patches.Patch(facecolor=domain_color, edgecolor='dimgray', label=domain_name)
+        )
+    overview_axis.legend(
+        handles=overview_legend,
+        loc='center left', bbox_to_anchor=(1.005, 0.5),
+        frameon=False, prop={'size': 9, 'weight': 'bold'}
+    )
+
+    difference_legend = [
+        patches.Patch(facecolor='#F4A3A3', edgecolor='none', alpha=0.35, label='Different CDS segment'),
+        patches.Patch(facecolor='#e0e0e0', edgecolor='#999999', label='UTR'),
+        patches.Patch(facecolor='#5B8DB8', edgecolor='#2C5F8A', label='CDS')
+    ]
+    focused_domain_names = set()
+    for tx in all_txs_to_plot:
+        if df_domains.empty or not tx_info[tx]['protein_id']:
+            continue
+        tx_domains = df_domains[
+            df_domains['Protein_ID'].str.contains(
+                tx_info[tx]['protein_id'], na=False, regex=False
+            )
+        ]
+        for _, row_domain in tx_domains.iterrows():
+            if map_pos(row_domain['Genomic_End']) > view_start and map_pos(row_domain['Genomic_Start']) < view_end:
+                focused_domain_names.add(row_domain['Domain_Name'])
+    for domain_name in sorted(focused_domain_names):
+        domain_color = dynamic_domain_colors.get(domain_name, 'orange')
+        difference_legend.append(
+            patches.Patch(facecolor=domain_color, edgecolor='dimgray', label=domain_name)
+        )
+    difference_axis.legend(
+        handles=difference_legend,
+        loc='upper center', bbox_to_anchor=(0.5, -0.12),
+        ncol=min(6, len(difference_legend)), frameon=False,
+        prop={'size': 9, 'weight': 'bold'}
+    )
+    difference_filename = os.path.join(OUT_DIR, "IsoImpact_overview_zoom.png")
+    difference_figure.savefig(
+        difference_filename, dpi=300, bbox_inches='tight', facecolor='white'
+    )
+    plt.close(difference_figure)
+    print(f"[IsoImpact] Overview-and-zoom figure written to {difference_filename}")
+
+plt.close(fig)
 
 print("[IsoImpact] Analysis complete.")
 print(f"[IsoImpact] Figure written to {output_filename}")
